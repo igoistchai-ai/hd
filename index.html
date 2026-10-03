@@ -1,439 +1,643 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Marketplace — Headless Horseman</title>
-<style>
-:root{
-  --bg:#fff;--panel:#fff;--soft:#f6f6f7;--soft2:#f1f1f2;--line:#e5e5e7;
-  --text:#171717;--muted:#707070;--blue:#4056ea;--blue2:#3348d7;
-  --black:#111;--shadow:0 18px 55px rgba(0,0,0,.16);
-  --sidebar:124px;--header:48px;
-}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);background:var(--bg)}
-body{font-size:13px}
-button,input{font:inherit}
-button{border:0}
-button:focus-visible,input:focus-visible{outline:2px solid #6073ff;outline-offset:2px}
-.app{min-height:100vh;display:grid;grid-template-columns:var(--sidebar) 1fr}
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar);background:#fff;border-right:1px solid var(--line);padding:9px 8px 10px;display:flex;flex-direction:column;z-index:20}
-.logo{font-size:15px;font-weight:800;letter-spacing:-.7px;padding:4px 5px 12px}
-.profile{display:flex;align-items:center;gap:6px;padding:5px;border-radius:7px;margin-bottom:7px}
-.avatar{width:25px;height:25px;border-radius:50%;background:linear-gradient(145deg,#cfcfcf,#555);position:relative;overflow:hidden;flex:none}
-.avatar:after{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:#eee;left:7px;top:4px;box-shadow:0 10px 0 5px #eee}
-.profile span{font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nav{display:flex;flex-direction:column;gap:1px}
-.nav button{width:100%;display:flex;align-items:center;gap:6px;background:transparent;color:#4d4d4d;padding:6px 5px;border-radius:6px;font-size:10px;text-align:left;cursor:pointer}
-.nav button:hover{background:#f3f3f4;color:#111}
-.nav button.active{background:#f0f0f2;color:#111;font-weight:700}
-.icon{width:14px;height:14px;display:grid;place-items:center;flex:none;color:currentColor}
-.icon svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.badge{margin-left:auto;background:#111;color:#fff;border-radius:8px;padding:1px 4px;font-size:8px}
-.promo{margin-top:auto;border-radius:7px;overflow:hidden;background:#2020d7;color:white;min-height:86px;position:relative;padding:7px}
-.promo .p1{font-weight:800;font-size:9px}.promo .p2{font-size:8px;opacity:.82;margin-top:3px}
-.promo .orb{position:absolute;right:-7px;bottom:-12px;width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#74c6ff 28%,#3131e9 62%,#1717a5)}
-.main{grid-column:2;min-width:0}
-.header{height:var(--header);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 18px;position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);z-index:15}
-.header-brand{font-weight:800;font-size:14px;letter-spacing:-.5px}
-.topnav{display:flex;gap:13px;white-space:nowrap}
-.topnav button{background:none;color:#444;font-size:11px;cursor:pointer;padding:5px 0}
-.topnav button:hover{color:#000}
-.search{height:30px;flex:1;max-width:470px;margin-left:5px;background:#f3f3f4;border-radius:7px;display:flex;align-items:center;gap:7px;padding:0 10px;color:#8a8a8a}
-.search input{border:0;background:transparent;outline:0;width:100%;font-size:11px;color:#222}
-.header-actions{margin-left:auto;display:flex;align-items:center;gap:9px}
-.hicon{width:27px;height:27px;border-radius:6px;background:transparent;display:grid;place-items:center;color:#444;cursor:pointer}
-.hicon:hover{background:#f2f2f3}
-.balance{font-size:10px;font-weight:700;display:flex;gap:4px;align-items:center;white-space:nowrap}
-.robux{font-weight:900;font-size:11px}
-.page{max-width:1100px;margin:0 auto;padding:20px 24px 12px}
-.breadcrumb{font-size:10px;color:#888;margin-bottom:14px}
-.product{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(290px,.75fr);gap:22px}
-.preview{background:#f5f5f6;border:1px solid #ededee;border-radius:8px;min-height:425px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.preview:before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);top:50%;left:50%;transform:translate(-50%,-50%)}
-.model{width:155px;height:280px;position:relative;z-index:2;animation:turn 7s linear infinite;transform-style:preserve-3d;filter:drop-shadow(0 18px 14px rgba(0,0,0,.15))}
-.model .head{position:absolute;top:0;left:40px;width:76px;height:82px;background:linear-gradient(145deg,#111,#333 55%,#090909);border-radius:44% 44% 38% 38%;box-shadow:inset -12px -7px 18px rgba(255,255,255,.08)}
-.model .hat{position:absolute;top:-11px;left:31px;width:95px;height:21px;background:#0c0c0c;border-radius:50%;box-shadow:0 6px 0 #171717}
-.model .hat:after{content:"";position:absolute;left:35px;top:-22px;width:27px;height:31px;background:#0b0b0b;border-radius:9px 9px 2px 2px}
-.model .torso{position:absolute;top:77px;left:25px;width:105px;height:126px;background:linear-gradient(90deg,#151515,#3b3b3b 45%,#111);clip-path:polygon(16% 0,84% 0,100% 100%,0 100%);border-radius:10px}
-.model .belt{position:absolute;top:165px;left:25px;width:105px;height:13px;background:#070707;border-top:2px solid #666}
-.model .leg{position:absolute;top:194px;width:39px;height:83px;background:linear-gradient(90deg,#111,#3c3c3c,#111);border-radius:7px 7px 4px 4px}
-.model .l{left:28px}.model .r{right:28px}
-.model .arm{position:absolute;top:87px;width:31px;height:112px;background:linear-gradient(90deg,#0e0e0e,#424242,#111);border-radius:13px}
-.model .al{left:1px;transform:rotate(5deg)}.model .ar{right:1px;transform:rotate(-5deg)}
-.model .boot{position:absolute;bottom:-2px;width:48px;height:18px;background:#090909;border-radius:5px}.model .bl{left:22px}.model .br{right:22px}
-@keyframes turn{0%{transform:rotateY(-14deg)}50%{transform:rotateY(14deg)}100%{transform:rotateY(-14deg)}}
-.model.static{animation:none}
-.preview.twoD .model{transform:rotateY(0)!important}
-.preview-controls{position:absolute;left:12px;bottom:12px;display:flex;gap:6px;z-index:5}
-.small-btn{height:27px;padding:0 10px;border:1px solid #dedee0;background:#fff;border-radius:6px;color:#333;font-size:10px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.04)}
-.small-btn:hover{background:#f4f4f5}
-.product-info{padding:5px 1px 0}
-.title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.title{font-size:23px;line-height:1.1;letter-spacing:-.8px;font-weight:750;margin:0}
-.creator{font-size:10px;color:#777;margin-top:7px;display:flex;align-items:center;gap:4px}
-.verified{width:12px;height:12px;border-radius:50%;background:#3f58e9;color:white;display:inline-grid;place-items:center;font-size:8px;font-weight:900}
-.price{margin-top:24px;padding-bottom:12px;border-bottom:1px solid var(--line);font-size:11px;color:#777}
-.price strong{font-size:20px;color:#111;margin-left:5px;letter-spacing:-.4px}
-.actions{display:grid;gap:7px;margin-top:12px}
-.buy,.gift{height:38px;border-radius:6px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:transform .12s,background .15s}
-.buy{background:var(--blue)}.buy:hover{background:var(--blue2)}
-.gift{background:#111}.gift:hover{background:#292929}
-.buy:active,.gift:active,.save:active{transform:scale(.985)}
-.details{margin-top:16px;border-top:1px solid var(--line)}
-.detail{display:grid;grid-template-columns:110px 1fr;padding:7px 0;border-bottom:1px solid #f0f0f1;font-size:10px}
-.detail span:first-child{color:#888}.detail span:last-child{color:#222}
-.included{margin-top:20px}
-.section-title{font-size:13px;font-weight:750;margin-bottom:9px}
-.items{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
-.item{width:86px;flex:0 0 86px}
-.thumb{height:70px;border-radius:7px;background:#f1f1f2;border:1px solid #e8e8e9;display:grid;place-items:center;overflow:hidden}
-.thumb .mini{width:32px;height:48px;border-radius:11px 11px 6px 6px;background:linear-gradient(145deg,#111,#777);position:relative}
-.thumb .mini:before{content:"";position:absolute;width:25px;height:25px;border-radius:50%;background:#222;top:-11px;left:3px}
-.item-name{font-size:9px;line-height:1.2;margin-top:5px;color:#333;white-space:normal}
-.item-type{font-size:8px;color:#999;margin-top:2px}
-.footer{border-top:1px solid var(--line);margin-top:20px;padding:13px 0 5px;display:flex;flex-wrap:wrap;gap:8px 15px;align-items:center;color:#777;font-size:8px}
-.footer button{background:none;color:#666;padding:0;cursor:pointer;font-size:8px}
-.footer button:hover{text-decoration:underline;color:#111}
-.language{margin-left:auto;border:1px solid var(--line);border-radius:5px;padding:5px 8px;background:#fff;color:#666}
-.chat-launch{position:fixed;right:18px;bottom:16px;background:#fff;border:1px solid #dcdcdf;border-radius:8px;height:32px;padding:0 11px;display:flex;gap:6px;align-items:center;box-shadow:0 5px 18px rgba(0,0,0,.08);font-size:10px;font-weight:650;cursor:pointer;z-index:30}
-.chat-panel{position:fixed;right:18px;bottom:56px;width:270px;background:#fff;border:1px solid #dedee1;border-radius:10px;box-shadow:var(--shadow);z-index:31;overflow:hidden;opacity:0;transform:translateY(8px) scale(.98);pointer-events:none;transition:.18s ease}
-.chat-panel.open{opacity:1;transform:none;pointer-events:auto}
-.chat-head{height:40px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 11px;font-weight:700;font-size:11px}
-.chat-close{background:none;cursor:pointer;color:#777}
-.chat-body{height:150px;padding:10px;font-size:10px;color:#777}
-.chat-form{display:flex;border-top:1px solid var(--line);padding:7px;gap:5px}
-.chat-form input{flex:1;min-width:0;height:28px;border:1px solid #ddd;border-radius:5px;padding:0 7px;outline:0;font-size:10px}
-.chat-form button{height:28px;background:var(--blue);color:#fff;border-radius:5px;padding:0 9px;font-size:9px;font-weight:700;cursor:pointer}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.64);z-index:50;opacity:0;pointer-events:none;transition:opacity .18s}
-.overlay.open{opacity:1;pointer-events:auto}
-.modal{position:fixed;z-index:51;left:50%;top:50%;width:280px;max-height:calc(100vh - 50px);overflow:hidden;background:#fff;border-radius:9px;box-shadow:0 25px 80px rgba(0,0,0,.3);opacity:0;transform:translate(-50%,-50%) scale(.985);pointer-events:none;transition:.18s ease}
-.modal.open{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
-.modal-head{height:43px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 11px;gap:7px}
-.gift-icon{width:18px;height:18px;border:1.5px solid #111;border-radius:3px;position:relative}
-.gift-icon:before{content:"";position:absolute;left:7px;top:-2px;height:20px;border-left:1.5px solid #111}
-.gift-icon:after{content:"";position:absolute;left:-2px;right:-2px;top:5px;border-top:1.5px solid #111}
-.modal-title{font-size:11px;font-weight:750}
-.modal-balance{margin-left:auto;font-size:9px;font-weight:700;display:flex;gap:3px;align-items:center}
-.close{background:none;color:#777;font-size:17px;line-height:1;cursor:pointer;margin-left:8px}
-.modal-content{padding:12px}
-.gift-product{display:flex;gap:8px;align-items:center;padding-bottom:11px;border-bottom:1px solid var(--line)}
-.gift-thumb{width:45px;height:45px;background:#f0f0f1;border-radius:6px;display:grid;place-items:center}
-.gift-thumb .mini{width:20px;height:31px;border-radius:7px 7px 3px 3px;background:#222;position:relative}
-.gift-thumb .mini:before{content:"";position:absolute;top:-7px;left:2px;width:16px;height:16px;border-radius:50%;background:#151515}
-.gift-name{font-size:10px;font-weight:700}.gift-sub{font-size:9px;color:#777;margin-top:3px}
-.change{margin-top:9px;background:none;color:#4056ea;font-size:9px;padding:0;cursor:pointer}
-.question{font-size:10px;font-weight:650;margin:13px 0 7px}
-.searchbox{height:32px;border:1px solid #dcdcdf;border-radius:6px;display:flex;align-items:center;padding:0 8px;gap:6px}
-.searchbox input{border:0;outline:0;width:100%;font-size:10px}
-.mini-label{font-size:9px;color:#777;margin:13px 0 7px}
-.loading{text-align:center;padding:16px 0;color:#777;font-size:9px}
-.spinner{width:16px;height:16px;border:2px solid #ddd;border-top-color:#111;border-radius:50%;margin:0 auto 7px;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.friend-list{max-height:205px;overflow:auto}
-.friend{display:flex;align-items:center;gap:8px;padding:7px;border-radius:6px;cursor:pointer}
-.friend:hover{background:#f3f3f4}
-.friend-avatar{width:27px;height:27px;border-radius:50%;background:linear-gradient(145deg,#d8d8d8,#555);position:relative;overflow:hidden;flex:none}
-.friend-avatar:after{content:"";position:absolute;width:9px;height:9px;background:#eee;border-radius:50%;left:9px;top:4px;box-shadow:0 9px 0 4px #eee}
-.friend-name{font-size:10px;font-weight:650}
-.back{background:none;cursor:pointer;padding:0;color:#555;font-size:13px;margin-right:2px}
-.selected-user{display:flex;flex-direction:column;align-items:center;padding:7px 0 10px}
-.big-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(145deg,#ddd,#555);position:relative;overflow:hidden}
-.big-avatar:after{content:"";position:absolute;width:17px;height:17px;background:#eee;border-radius:50%;left:18px;top:8px;box-shadow:0 16px 0 8px #eee}
-.username{font-size:12px;font-weight:750;margin-top:6px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:4px 0 12px}
-.stat{background:#f5f5f6;border-radius:6px;padding:7px 4px;text-align:center}
-.stat b{display:block;font-size:9px}.stat span{display:block;font-size:7px;color:#888;margin-top:3px}
-.confirm-text{text-align:center;font-size:10px;color:#555;margin:9px 0}
-.big-price{text-align:center;font-size:20px;font-weight:800;margin:5px 0 12px}
-.full{width:100%;height:34px;border-radius:6px;color:#fff;background:var(--blue);font-size:10px;font-weight:750;cursor:pointer}
-.success{text-align:center;padding:10px 2px 3px}
-.success .gift-thumb{width:76px;height:76px;margin:0 auto 10px}
-.success .gift-thumb .mini{width:30px;height:45px}
-.success h3{font-size:16px;margin:0 0 5px}
-.success p{font-size:9px;color:#777;margin:3px 0}
-.success .sent-price{font-size:14px;font-weight:800;margin:8px 0 12px}
-.settings{position:fixed;right:16px;top:58px;width:170px;background:#10121a;color:#fff;border-radius:9px;padding:10px;z-index:40;box-shadow:0 18px 45px rgba(0,0,0,.25);opacity:0;transform:translateY(-5px);pointer-events:none;transition:.16s}
-.settings.open{opacity:1;transform:none;pointer-events:auto}
-.settings-head{display:flex;align-items:center;gap:7px;margin-bottom:12px}
-.ma{width:23px;height:23px;border-radius:5px;background:#4e5df0;display:grid;place-items:center;font-size:8px;font-weight:800}
-.ma-title{font-size:9px;font-weight:750}.ma-sub{font-size:7px;color:#9da0aa;margin-top:2px}
-.setting-label{font-size:7px;color:#9296a1;letter-spacing:.3px;margin-bottom:5px}
-.setting-balance{background:#1c1f29;border-radius:6px;padding:7px;font-size:10px;font-weight:750;display:flex;align-items:center;gap:5px}
-.toggle-row{display:flex;justify-content:space-between;align-items:center;margin:11px 1px;font-size:9px}
-.toggle{width:29px;height:16px;background:#383c48;border-radius:10px;padding:2px;cursor:pointer}
-.toggle i{display:block;width:12px;height:12px;border-radius:50%;background:#fff;transition:.15s}
-.toggle.on{background:#4f5df1}.toggle.on i{transform:translateX(13px)}
-.save{width:100%;height:28px;border-radius:5px;background:#5866f2;color:#fff;font-size:9px;font-weight:700;cursor:pointer}
-.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(10px);background:#111;color:#fff;border-radius:6px;padding:7px 10px;font-size:9px;opacity:0;pointer-events:none;transition:.18s;z-index:100}
-.toast.show{opacity:1;transform:translateX(-50%)}
-.hidden{display:none!important}
-@media(max-width:900px){
-  :root{--sidebar:100px}
-  .page{padding:16px}
-  .product{grid-template-columns:1fr}
-  .preview{min-height:350px}
-  .header{gap:9px;padding:0 10px}.topnav{display:none}
-}
-@media(max-width:600px){
-  :root{--sidebar:0px}
-  .sidebar{transform:translateX(-100%);transition:.2s}
-  .main{grid-column:1}
-  .header-brand{display:none}
-  .page{padding:12px}
-  .preview{min-height:300px}
-  .product-info{padding-top:0}
-  .footer{display:block}.footer>*{margin-right:12px}
-  .language{margin-top:8px}
-}
-
-#accessGate{position:fixed;inset:0;z-index:300;background:#fff;display:flex;align-items:center;justify-content:center}
-.access-card{width:390px;max-width:92vw;background:#fff;border:1px solid #e2e2e4;border-radius:10px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.10)}
-.access-brand{font-size:20px;font-weight:800;letter-spacing:-.55px}.access-title{font-size:14px;font-weight:750;margin-top:17px}.access-sub{font-size:9px;color:#85878c;line-height:1.45;margin-top:5px}.access-input{width:100%;height:39px;border:1px solid #d6d7da;border-radius:7px;margin-top:14px;padding:0 11px;font-size:10px;outline:none}.access-input:focus{border-color:#8090ed;box-shadow:0 0 0 3px rgba(64,86,234,.08)}.access-error{min-height:16px;color:#c83e3e;font-size:8px;margin-top:6px}.access-submit{width:100%;height:37px;background:#111;color:#fff;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;margin-top:2px}.access-submit:hover{background:#272727}.access-meta{margin-top:11px;text-align:center;color:#a1a3a7;font-size:8px}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Headless Horseman</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<section id="accessGate" aria-label="Access key"><div class="access-card"><div class="access-brand">NEZZX</div><div class="access-title">Welcome back</div><div class="access-sub">Enter your access key to continue.</div><input id="accessKeyInput" class="access-input" placeholder="CC-XXXXXXX-XXXXXXX-XXXXXXX" autocomplete="off" spellcheck="false"><div id="accessError" class="access-error"></div><button id="accessSubmit" class="access-submit">Continue</button><div class="access-meta">Use the access key issued to your account.</div></div></section>
+  <!-- TOP NAV -->
+  <header class="topbar">
+    <div class="brand">ROBLOX</div>
 
-<div class="app">
-<aside class="sidebar">
-  <div class="logo">ROBLOX</div>
-  <div class="profile"><div class="avatar"></div><span id="profileName">Player</span></div>
-  <nav class="nav">
-    <button class="active"><span class="icon">⌂</span>Home</button>
-    <button><span class="icon">◉</span>Profile</button>
-    <button><span class="icon">＋</span>Roblox Plus</button>
-    <button><span class="icon">□</span>Messages<span class="badge">2</span></button>
-    <button><span class="icon">♧</span>Friends</button>
-    <button><span class="icon">◌</span>Avatar</button>
-    <button><span class="icon">▦</span>Inventory</button>
-    <button><span class="icon">↔</span>Trade</button>
-    <button><span class="icon">◎</span>Communities</button>
-    <button><span class="icon">N</span>Newsroom</button>
-    <button><span class="icon">▣</span>Official Store</button>
-    <button><span class="icon">▱</span>Buy Gift Cards</button>
-  </nav>
-  <div class="promo"><div class="p1">BUILD<br>YOUR WORLD</div><div class="p2">Create something new.</div><div class="orb"></div></div>
-</aside>
+    <nav class="topnav">
+      <span>Charts</span>
+      <span>Marketplace</span>
+      <span>Create</span>
+      <span>Robux</span>
+    </nav>
 
-<main class="main">
-<header class="header">
-  <div class="header-brand">ROBLOX</div>
-  <nav class="topnav">
-    <button>Charts</button><button>Marketplace</button><button>Create</button><button>Robux</button>
-  </nav>
-  <label class="search"><span>⌕</span><input placeholder="Search"></label>
-  <div class="header-actions">
-    <button class="hicon" id="settingsOpen" aria-label="Open settings">⚙</button>
-    <button class="hicon" aria-label="Notifications">♢</button>
-    <div class="balance"><span class="robux">R$</span><span id="headerBalance">0</span></div>
-  </div>
-</header>
-
-<section class="page">
-  <div class="breadcrumb">Marketplace / Characters / Headless Horseman</div>
-  <section class="product">
-    <div>
-      <div class="preview" id="preview">
-        <div class="model" id="model">
-          <div class="hat"></div><div class="head"></div>
-          <div class="arm al"></div><div class="arm ar"></div>
-          <div class="torso"></div><div class="belt"></div>
-          <div class="leg l"></div><div class="leg r"></div>
-          <div class="boot bl"></div><div class="boot br"></div>
-        </div>
-        <div class="preview-controls">
-          <button class="small-btn">Try On</button>
-          <button class="small-btn" id="modeBtn">2D</button>
-        </div>
-      </div>
+    <div class="search">
+      <span class="search-icon">⌕</span>
+      <input placeholder="Search">
     </div>
 
-    <div class="product-info">
-      <div class="title-row">
+    <div class="account">
+      <div class="mini-avatar"></div>
+      <span>Anto</span>
+      <span class="chevron">⌄</span>
+      <span class="bell">♧</span>
+      <span class="robux-icon">◉</span>
+      <b>122,546,312</b>
+      <span class="settings">⚙</span>
+    </div>
+  </header>
+
+  <!-- PAGE -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="user-row">
+        <div class="side-avatar"></div>
         <div>
-          <h1 class="title">Headless Horseman</h1>
-          <div class="creator">By Roblox <span class="verified">✓</span></div>
+          <strong>Anto</strong>
+          <small>Profile</small>
         </div>
       </div>
-      <div class="price">Price <strong><span class="robux">R$</span> 31,000</strong></div>
-      <div class="actions">
-        <button class="buy" id="buyBtn">Buy</button>
-        <button class="gift" id="giftBtn">Gift</button>
+
+      <div class="share-box">
+        <span class="share-icon">◈</span>
+        <span>Share Plus to get 100<br>Robux</span>
+        <button>New</button>
       </div>
-      <div class="details">
-        <div class="detail"><span>Tradable</span><span>No</span></div>
-        <div class="detail"><span>Type</span><span>Characters</span></div>
-        <div class="detail"><span>Placement</span><span>Full Body</span></div>
-        <div class="detail"><span>Created</span><span>Aug 15, 2018</span></div>
-        <div class="detail"><span>Description</span><span>No, you must believe me. It was a horseman, a dead one. Headless.</span></div>
+
+      <div class="side-menu">
+        <div>⌂ <span>Home</span></div>
+        <div>♙ <span>Profile</span></div>
+        <div>◈ <span>Plus</span></div>
+        <div>▱ <span>Messages</span><em>20</em></div>
+        <div>♧ <span>Friends</span><em>190</em></div>
+        <div>♙ <span>Avatar</span></div>
+        <div>▣ <span>Inventory</span></div>
+        <div>⇄ <span>Trade</span></div>
+        <div>♧ <span>Communities</span></div>
+        <div>▤ <span>Newsroom</span></div>
+        <div>▣ <span>Official Store</span></div>
+        <div>▤ <span>Buy Gift Cards</span></div>
       </div>
-    </div>
-  </section>
 
-  <section class="included">
-    <div class="section-title">Included Items</div>
-    <div class="items">
-      <div class="item"><div class="thumb"><div class="mini"></div></div><div class="item-name">Headless Horseman</div><div class="item-type">Bundle</div></div>
-      <div class="item"><div class="thumb"><div class="mini"></div></div><div class="item-name">Headless Head</div><div class="item-type">Body</div></div>
-      <div class="item"><div class="thumb"><div class="mini"></div></div><div class="item-name">Headless Horseman Left</div><div class="item-type">Left Arm</div></div>
-      <div class="item"><div class="thumb"><div class="mini"></div></div><div class="item-name">Headless Horseman Right</div><div class="item-type">Right Arm</div></div>
-      <div class="item"><div class="thumb"><div class="mini"></div></div><div class="item-name">Headless Horseman Body</div><div class="item-type">Torso</div></div>
-      <div class="item"><div class="thumb"><div class="mini"></div></div><div class="item-name">Off Sale Gear</div><div class="item-type">Gear</div></div>
-      <div class="item"><div class="thumb"><div class="mini"></div></div><div class="item-name">Headless Legs</div><div class="item-type">Body</div></div>
-      <div class="item"><div class="thumb"><div class="mini"></div></div><div class="item-name">Anime - Mood</div><div class="item-type">Face</div></div>
-    </div>
-  </section>
+      <div class="hunt-card">
+        <div class="hunt-title">THE<br><b>HUNT</b></div>
+        <small>ROBLOX</small>
+      </div>
 
-  <footer class="footer">
-    <button>About Us</button><button>Jobs</button><button>Newsroom</button><button>Parents</button>
-    <button>Buy Gift Cards</button><button>Help</button><button>Terms</button><button>Privacy</button>
-    <button>Accessibility</button><button>Privacy Choice</button><button>Sitemap</button>
-    <button class="language">English (United States) ▾</button>
-    <span>© 2026 Marketplace. All rights reserved.</span>
-  </footer>
-</section>
-</main>
-</div>
+    </aside>
 
-<button class="chat-launch" id="chatLaunch">▱ <span>Chat</span></button>
-<section class="chat-panel" id="chatPanel">
-  <div class="chat-head"><span>Chat</span><button class="chat-close" id="chatClose">×</button></div>
-  <div class="chat-body" id="chatBody">How can we help?</div>
-  <form class="chat-form" id="chatForm"><input id="chatInput" placeholder="Message..."><button>Send</button></form>
-</section>
+    <!-- MAIN -->
+    <main class="content">
 
-<div class="settings" id="settings">
-  <div class="settings-head"><div class="ma">MA</div><div><div class="ma-title">Marketplace Tools</div><div class="ma-sub">Marketplace Tools</div></div></div>
-  <div class="setting-label">ROBLOX BALANCE</div>
-  <div class="setting-balance"><span class="robux">R$</span><span id="settingsBalance">0</span></div>
-  <div class="toggle-row"><span>Enabled</span><div class="toggle on" id="toggle"><i></i></div></div>
-  <button class="save" id="saveSettings">Save Settings</button>
-</div>
+      <section class="product">
 
-<div class="overlay" id="overlay"></div>
-<section class="modal" id="giftModal" role="dialog" aria-modal="true" aria-label="Send gift">
-  <div class="modal-head">
-    <div class="gift-icon"></div><div class="modal-title">Send gift</div>
-    <div class="modal-balance"><span class="robux">R$</span><span id="modalBalance">0</span></div>
-    <button class="close" id="modalClose">×</button>
+        <div class="product-preview">
+          <div class="preview-stage">
+            <img
+              class="horseman"
+              src="https://tr.rbxcdn.com/180DAY-0d0b2b8a5e4a7a8b4f2e0c6e8a7b5c1f/420/420/Bundle/Png/noFilter"
+              alt=""
+              onerror="this.style.display='none'; document.querySelector('.fallback-character').classList.add('show')"
+            >
+
+            <div class="fallback-character">
+              <div class="pumpkin"></div>
+              <div class="body"></div>
+              <div class="arm left"></div>
+              <div class="arm right"></div>
+              <div class="leg left"></div>
+              <div class="leg right"></div>
+            </div>
+          </div>
+
+          <div class="preview-actions">
+            <button class="star">☆</button>
+            <button class="cart">▱</button>
+          </div>
+        </div>
+
+        <div class="details">
+
+          <div class="title-line">
+            <div>
+              <h1>Headless Horseman</h1>
+              <p>By <b>Roblox</b> <span class="verified">✓</span></p>
+            </div>
+            <div class="small-cart">🛒 <span>0</span></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="price-row">
+            <span>Price</span>
+            <strong><span class="robux-small">◉</span> 31,000</strong>
+          </div>
+
+          <button class="buy-btn" id="buyButton">Buy</button>
+          <button class="gift-btn" id="giftButton">
+            <span>◈</span> Gift
+          </button>
+
+          <div class="info-row">
+            <span>Tradable</span>
+            <b>No</b>
+          </div>
+
+          <div class="description">
+            <h3>About</h3>
+            <p>
+              The Headless Horseman is a classic avatar bundle.
+              A mysterious horseman without a head.
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="included">
+
+        <div class="included-head">
+          <h2>Included Items</h2>
+          <span>5</span>
+        </div>
+
+        <div class="items-grid">
+
+          <div class="item-card">
+            <div class="item-image horse-item">
+              <div class="mini-pumpkin"></div>
+              <div class="mini-body"></div>
+            </div>
+            <strong>Headless Horseman</strong>
+            <small>Bundle</small>
+          </div>
+
+          <div class="item-card">
+            <div class="item-image pumpkin-item">
+              <div class="big-pumpkin"></div>
+            </div>
+            <strong>Headless</strong>
+            <small>Head</small>
+          </div>
+
+          <div class="item-card">
+            <div class="item-image head-item">
+              <div class="headless"></div>
+            </div>
+            <strong>Headless Head</strong>
+            <small>Dynamic Head</small>
+          </div>
+
+          <div class="item-card">
+            <div class="item-image gear-item">
+              <div class="gear"></div>
+            </div>
+            <strong>Headless Horseman's...</strong>
+            <small>Off Sale Gear</small>
+          </div>
+
+          <div class="item-card">
+            <div class="item-image face-item">
+              <div class="face"></div>
+            </div>
+            <strong>Anime - Mood</strong>
+            <small>Mood Animation</small>
+          </div>
+
+        </div>
+
+      </section>
+
+      <footer>
+        <div class="footer-links">
+          <span>About Us</span>
+          <span>Jobs</span>
+          <span>Newsroom</span>
+          <span>Parents</span>
+          <span>Buy Gift Cards</span>
+          <span>Help</span>
+          <span>Terms</span>
+          <span>Accessibility</span>
+          <span>Privacy</span>
+          <span>Sitemap</span>
+        </div>
+
+        <div class="footer-bottom">
+          <select>
+            <option>English (United States)</option>
+          </select>
+
+          <span>©2026 Corporation. All rights reserved.</span>
+        </div>
+      </footer>
+
+    </main>
   </div>
-  <div class="modal-content" id="modalContent"></div>
-</section>
-<div class="toast" id="toast"></div>
 
-<script>
-const friends=[
- {username:"yannis4444",mutualFriends:6,joined:"Nov 9, 2021",lastActive:"1 day ago",giftPrice:31000,giftName:"Headless Horseman"},
- {username:"Astrix_Gaming",mutualFriends:4,joined:"Jun 12, 2020",lastActive:"2 hours ago",giftPrice:31000,giftName:"Headless Horseman"},
- {username:"00milose735",mutualFriends:8,joined:"Jan 18, 2019",lastActive:"3 hours ago",giftPrice:31000,giftName:"Headless Horseman"},
- {username:"fushyfj55",mutualFriends:3,joined:"May 8, 2022",lastActive:"30 minutes ago",giftPrice:31000,giftName:"Headless Horseman"}
-];
-let state={selectedFriend:null,giftStep:"friends-search",balance:122546312,enabled:true,previewMode:"3d",loadingTimer:null};
 
-const $=s=>document.querySelector(s);
-const money=n=>n.toLocaleString("en-US");
-const toast=(t)=>{const el=$("#toast");el.textContent=t;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("show"),1700)}
-function updateBalances(){["headerBalance","settingsBalance","modalBalance"].forEach(id=>{$("#"+id).textContent=money(state.balance)})}
+  <!-- GIFT OVERLAY -->
+  <div class="overlay" id="overlay">
 
-function renderModal(){
- const c=$("#modalContent");
- if(state.giftStep==="friends-search"){
-   c.innerHTML=`
-    <div class="gift-product"><div class="gift-thumb"><div class="mini"></div></div><div><div class="gift-name">Headless Horseman</div><div class="gift-sub"><span class="robux">R$</span> 31,000</div></div></div>
-    <button class="change" id="changeGift">Change gift</button>
-    <div class="question">Who would you like to gift this to?</div>
-    <label class="searchbox"><span>⌕</span><input id="friendSearch" placeholder="Search"></label>
-    <div class="mini-label">My friends</div>
-    <div class="loading"><div class="spinner"></div>Loading...</div>`;
-   state.loadingTimer=setTimeout(()=>{state.giftStep="friends-list";renderModal()},650);
- }else if(state.giftStep==="friends-list"){
-   c.innerHTML=`
-    <div class="gift-product"><div class="gift-thumb"><div class="mini"></div></div><div><div class="gift-name">Headless Horseman</div><div class="gift-sub"><span class="robux">R$</span> 31,000</div></div></div>
-    <button class="change" id="changeGift">Change gift</button>
-    <div class="question">Who would you like to gift this to?</div>
-    <label class="searchbox"><span>⌕</span><input id="friendSearch" placeholder="Search"></label>
-    <div class="mini-label">My friends (182)</div>
-    <div class="friend-list" id="friendList">${friends.map((f,i)=>`<div class="friend" data-i="${i}"><div class="friend-avatar"></div><div class="friend-name">${f.username}</div></div>`).join("")}</div>`;
-   $("#friendSearch").addEventListener("input",filterFriends);
-   document.querySelectorAll(".friend").forEach(x=>x.addEventListener("click",()=>selectFriend(+x.dataset.i)));
- }else if(state.giftStep==="friend-profile"){
-   const f=state.selectedFriend;
-   c.innerHTML=`
-    <div class="selected-user"><button class="back" id="backFriends">←</button><div class="big-avatar"></div><div class="username">${f.username}</div></div>
-    <div class="stats">
-      <div class="stat"><b>${f.mutualFriends}</b><span>Mutual Friends</span></div>
-      <div class="stat"><b>${f.joined}</b><span>Joined</span></div>
-      <div class="stat"><b>${f.lastActive}</b><span>Last active</span></div>
+    <div class="gift-modal" id="giftModal">
+
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>◈</span>
+          <strong>Send gift</strong>
+        </div>
+
+        <div class="balance">
+          <span>◉</span> 122,546,312
+        </div>
+
+        <button class="close" id="closeGift">×</button>
+      </div>
+
+      <div class="gift-product">
+
+        <div class="gift-thumb">
+          <div class="mini-pumpkin"></div>
+          <div class="mini-body"></div>
+        </div>
+
+        <div>
+          <strong>Headless Horseman</strong>
+          <p><span>◉</span> 31,000</p>
+        </div>
+
+      </div>
+
+      <button class="change-gift" id="changeGift">Change gift</button>
+
+      <h3>Who would you like to gift this to?</h3>
+
+      <div class="friend-search">
+        <span>⌕</span>
+        <input id="friendSearch" placeholder="Search friends">
+      </div>
+
+      <div class="matching">
+        <h3>Matching friends</h3>
+
+        <div class="loading" id="loading">
+          <span></span>
+          <span></span>
+          <span></span>
+          Loading...
+        </div>
+
+        <div class="friends-list" id="friendsList">
+
+          <div class="friend" data-name="michael">
+
+            <div class="friend-avatar avatar-one"></div>
+
+            <div class="friend-info">
+              <strong>michael</strong>
+              <small>Mutual friends: 4</small>
+              <small>Last active recently</small>
+            </div>
+
+            <button class="select-friend">Select</button>
+
+          </div>
+
+          <div class="friend" data-name="alex">
+
+            <div class="friend-avatar avatar-two"></div>
+
+            <div class="friend-info">
+              <strong>alex</strong>
+              <small>Mutual friends: 12</small>
+              <small>Last active today</small>
+            </div>
+
+            <button class="select-friend">Select</button>
+
+          </div>
+
+          <div class="friend" data-name="john">
+
+            <div class="friend-avatar avatar-three"></div>
+
+            <div class="friend-info">
+              <strong>john</strong>
+              <small>Mutual friends: 2</small>
+              <small>Last active yesterday</small>
+            </div>
+
+            <button class="select-friend">Select</button>
+
+          </div>
+
+        </div>
+      </div>
+
+      <div class="selected-user" id="selectedUser">
+        <div class="selected-avatar"></div>
+        <div>
+          <small>Gift recipient</small>
+          <strong id="selectedName">michael</strong>
+        </div>
+        <span>✓</span>
+      </div>
+
+      <button class="send-gift" id="sendGift">
+        <span class="send-normal">Gift for 31,000</span>
+        <span class="send-loading">Gifting...</span>
+      </button>
+
+      <div class="gift-success" id="giftSuccess">
+        <div class="success-check">✓</div>
+        <strong>Gift sent</strong>
+        <span>Your gift has been sent successfully.</span>
+      </div>
+
     </div>
-    <div class="gift-product"><div class="gift-thumb"><div class="mini"></div></div><div><div class="gift-name">${f.giftName}</div><div class="gift-sub">Gift</div></div></div>
-    <div class="confirm-text">Send this gift to ${f.username}?</div>
-    <div class="big-price"><span class="robux">R$</span> ${money(f.giftPrice)}</div>
-    <button class="full" id="confirmGift">Gift</button>`;
-   $("#backFriends").onclick=()=>{state.giftStep="friends-list";renderModal()};
-   $("#confirmGift").onclick=sendGift;
- }else if(state.giftStep==="sent"){
-   const f=state.selectedFriend;
-   c.innerHTML=`
-    <div class="success">
-      <div class="gift-thumb"><div class="mini"></div></div>
-      <h3>Gift sent</h3>
-      <p>${f.giftName}</p>
-      <div class="sent-price"><span class="robux">R$</span> ${money(f.giftPrice)}</div>
-      <p>To ${f.username}</p>
-      <button class="full" id="anotherGift" style="margin-top:13px">Send another gift</button>
-    </div>`;
-   $("#anotherGift").onclick=()=>{state.selectedFriend=null;state.giftStep="friends-search";renderModal()};
- }
-}
-function filterFriends(e){
- const q=e.target.value.toLowerCase();
- document.querySelectorAll(".friend").forEach((x,i)=>x.style.display=friends[i].username.toLowerCase().includes(q)?"flex":"none")
-}
-function selectFriend(i){state.selectedFriend=friends[i];state.giftStep="friend-profile";renderModal()}
-function openGift(){clearTimeout(state.loadingTimer);state.giftStep="friends-search";$("#overlay").classList.add("open");$("#giftModal").classList.add("open");document.body.style.overflow="hidden";updateBalances();renderModal()}
-function closeGift(){clearTimeout(state.loadingTimer);$("#overlay").classList.remove("open");$("#giftModal").classList.remove("open");document.body.style.overflow=""}
-function sendGift(){
- const f=state.selectedFriend;
- if(state.balance<f.giftPrice){toast("Not enough Robux");return}
- state.balance-=f.giftPrice;updateBalances();state.giftStep="sent";renderModal();toast("Gift sent")
-}
 
-$("#giftBtn").onclick=openGift;
-$("#modalClose").onclick=closeGift;
-$("#overlay").onclick=closeGift;
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeGift();$("#chatPanel").classList.remove("open");$("#settings").classList.remove("open")}});
+  </div>
 
-$("#modeBtn").onclick=()=>{
- state.previewMode=state.previewMode==="3d"?"2d":"3d";
- $("#preview").classList.toggle("twoD",state.previewMode==="2d");
- $("#model").classList.toggle("static",state.previewMode==="2d");
- $("#modeBtn").textContent=state.previewMode==="2d"?"3D":"2D";
-};
 
-$("#chatLaunch").onclick=()=>$("#chatPanel").classList.toggle("open");
-$("#chatClose").onclick=()=>$("#chatPanel").classList.remove("open");
-$("#chatForm").onsubmit=e=>{e.preventDefault();const input=$("#chatInput");if(!input.value.trim())return;$("#chatBody").textContent="Message received: "+input.value.trim();input.value=""};
+  <!-- BUY MODAL -->
+  <div class="buy-overlay" id="buyOverlay">
 
-$("#settingsOpen").onclick=()=>$("#settings").classList.toggle("open");
-$("#toggle").onclick=()=>{state.enabled=!state.enabled;$("#toggle").classList.toggle("on",state.enabled)};
-$("#saveSettings").onclick=()=>{toast(state.enabled?"Settings saved":"Settings disabled");$("#settings").classList.remove("open")};
-$("#buyBtn").onclick=()=>toast("Purchase selected");
-updateBalances();
-</script>
+    <div class="buy-modal">
+
+      <button class="close" id="closeBuy">×</button>
+
+      <div class="buy-icon">◉</div>
+
+      <h2>Purchase</h2>
+
+      <p>
+        Would you like to purchase<br>
+        <b>Headless Horseman</b> for
+        <strong>31,000</strong>?
+      </p>
+
+      <div class="buy-actions">
+        <button id="cancelBuy">Cancel</button>
+        <button id="confirmBuy">Buy Now</button>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="toast" id="toast">
+    <span>✓</span>
+    <div>
+      <strong>Success</strong>
+      <small>Purchase completed</small>
+    </div>
+  </div>
+
 
 <script>
-(function(){
- const gate=document.getElementById('accessGate'),keyInput=document.getElementById('accessKeyInput'),error=document.getElementById('accessError'),submit=document.getElementById('accessSubmit'),profile=document.getElementById('profileName');
- function balance(n){const v=Number(n||0).toLocaleString('en-US');['headerBalance','settingsBalance','modalBalance'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=v})}
- async function login(){const key=keyInput.value.trim().toUpperCase();error.textContent='';if(!key){error.textContent='Enter your access key.';return}submit.disabled=true;try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});const d=await r.json();if(!r.ok||!d.ok){error.textContent=d.error||'Invalid access key.';return}profile.textContent=d.nickname||'Player';balance(d.robux||0);gate.style.display='none';sessionStorage.setItem('nezzx_access_key',key)}catch(e){error.textContent='Unable to connect to the server.'}finally{submit.disabled=false}}
- submit.addEventListener('click',login);keyInput.addEventListener('keydown',e=>{if(e.key==='Enter')login()});const remembered=sessionStorage.getItem('nezzx_access_key');if(remembered){keyInput.value=remembered;login()}
-})();
+
+const overlay = document.getElementById("overlay");
+const giftModal = document.getElementById("giftModal");
+const giftButton = document.getElementById("giftButton");
+const closeGift = document.getElementById("closeGift");
+const friendSearch = document.getElementById("friendSearch");
+const friends = document.querySelectorAll(".friend");
+const loading = document.getElementById("loading");
+const selectedUser = document.getElementById("selectedUser");
+const selectedName = document.getElementById("selectedName");
+const sendGift = document.getElementById("sendGift");
+const giftSuccess = document.getElementById("giftSuccess");
+
+let selected = false;
+
+
+/* OPEN GIFT */
+
+giftButton.addEventListener("click", () => {
+
+  overlay.classList.add("active");
+
+  document.body.classList.add("modal-open");
+
+  setTimeout(() => {
+    loading.classList.add("hidden");
+    document.getElementById("friendsList").classList.add("visible");
+  }, 650);
+
+});
+
+
+/* CLOSE GIFT */
+
+function closeGiftModal() {
+
+  overlay.classList.remove("active");
+
+  document.body.classList.remove("modal-open");
+
+  setTimeout(() => {
+
+    loading.classList.remove("hidden");
+    document.getElementById("friendsList").classList.remove("visible");
+
+    selectedUser.classList.remove("show");
+    giftSuccess.classList.remove("show");
+
+    sendGift.classList.remove("loading-state");
+    sendGift.disabled = false;
+
+    selected = false;
+
+  }, 300);
+
+}
+
+closeGift.addEventListener("click", closeGiftModal);
+
+overlay.addEventListener("click", (e) => {
+
+  if(e.target === overlay){
+    closeGiftModal();
+  }
+
+});
+
+
+/* SEARCH */
+
+friendSearch.addEventListener("input", () => {
+
+  const value = friendSearch.value.toLowerCase().trim();
+
+  friends.forEach(friend => {
+
+    const name = friend.dataset.name;
+
+    if(name.includes(value)){
+      friend.style.display = "flex";
+    }else{
+      friend.style.display = "none";
+    }
+
+  });
+
+});
+
+
+/* SELECT FRIEND */
+
+friends.forEach(friend => {
+
+  const button = friend.querySelector(".select-friend");
+
+  button.addEventListener("click", () => {
+
+    friends.forEach(f => f.classList.remove("selected"));
+
+    friend.classList.add("selected");
+
+    selectedName.textContent = friend.dataset.name;
+
+    selectedUser.classList.add("show");
+
+    selected = true;
+
+    setTimeout(() => {
+      selectedUser.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
+    }, 50);
+
+  });
+
+});
+
+
+/* SEND GIFT */
+
+sendGift.addEventListener("click", () => {
+
+  if(!selected){
+
+    friendSearch.focus();
+
+    friendSearch.classList.add("shake");
+
+    setTimeout(() => {
+      friendSearch.classList.remove("shake");
+    }, 500);
+
+    return;
+  }
+
+  sendGift.classList.add("loading-state");
+  sendGift.disabled = true;
+
+  setTimeout(() => {
+
+    sendGift.classList.remove("loading-state");
+
+    giftSuccess.classList.add("show");
+
+    setTimeout(() => {
+
+      closeGiftModal();
+
+      showToast(
+        "Gift sent",
+        "Headless Horseman was gifted to " + selectedName.textContent
+      );
+
+    }, 1700);
+
+  }, 1500);
+
+});
+
+
+/* CHANGE GIFT */
+
+document.getElementById("changeGift").addEventListener("click", () => {
+
+  friendSearch.value = "";
+
+  friends.forEach(friend => {
+    friend.style.display = "flex";
+  });
+
+  friendSearch.focus();
+
+});
+
+
+/* BUY */
+
+const buyOverlay = document.getElementById("buyOverlay");
+
+document.getElementById("buyButton").addEventListener("click", () => {
+
+  buyOverlay.classList.add("active");
+
+});
+
+
+document.getElementById("closeBuy").addEventListener("click", () => {
+
+  buyOverlay.classList.remove("active");
+
+});
+
+
+document.getElementById("cancelBuy").addEventListener("click", () => {
+
+  buyOverlay.classList.remove("active");
+
+});
+
+
+document.getElementById("confirmBuy").addEventListener("click", () => {
+
+  buyOverlay.classList.remove("active");
+
+  showToast(
+    "Purchase completed",
+    "Headless Horseman added to your inventory"
+  );
+
+});
+
+
+/* TOAST */
+
+function showToast(title, message){
+
+  const toast = document.getElementById("toast");
+
+  toast.querySelector("strong").textContent = title;
+  toast.querySelector("small").textContent = message;
+
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3500);
+
+}
+
+
+/* ESC */
+
+document.addEventListener("keydown", e => {
+
+  if(e.key === "Escape"){
+
+    if(overlay.classList.contains("active")){
+      closeGiftModal();
+    }
+
+    if(buyOverlay.classList.contains("active")){
+      buyOverlay.classList.remove("active");
+    }
+
+  }
+
+});
+
 </script>
 
-<script>window.__NEZZX_REFERENCE_SPEC__="ЗАДАЧА: СОЗДАТЬ ВЕБ-САЙТ, КОТОРЫЙ ВИЗУАЛЬНО И ПО ПОВЕДЕНИЮ МАКСИМАЛЬНО ТОЧНО ПОВТОРЯЕТ ИНТЕРФЕЙС И СЦЕНЫ ИЗ ПРЕДОСТАВЛЕННОГО ВИДЕО.\n\nВАЖНО:\n- Видео является главным визуальным референсом.\n- Не делай «примерно похожий» интерфейс. Воссоздай композицию, размеры, отступы, расположение элементов, состояния, модальные окна, цвета, типографику, тени, границы, hover/focus/active-состояния и анимации настолько точно, насколько это возможно.\n- Главный целевой размер референса: 1920×1080, desktop.\n- Страница должна корректно работать и при изменении ширины окна, но приоритет — совпадение с референсом 1920×1080.\n- Не включай рамку браузера Chrome как часть сайта. Воспроизводи именно содержимое страницы под адресной строкой.\n- Используй HTML + CSS + JavaScript. Для сложных деталей допустимы CSS pseudo-elements, SVG и небольшие inline-иконки.\n- Никаких фреймворков, если они не нужны. Предпочтительно чистые HTML/CSS/JS.\n- Не используй огромные сторонние UI-библиотеки только ради нескольких элементов.\n- Весь интерфейс должен быть реально интерактивным, а не просто картинкой.\n- Все элементы должны иметь правильные состояния и переходы.\n\n==================================================\n1. ОБЩЕЕ ВПЕЧАТЛЕНИЕ\n==================================================\n\nСделай чистый светлый marketplace/product-page интерфейс в стиле крупной платформы для игровых предметов.\n\nОсновные визуальные характеристики:\n- белый/очень светлый фон;\n- тонкие серые разделители;\n- компактная типографика;\n- очень аккуратная сетка;\n- скругления небольшие, не чрезмерные;\n- основной CTA — насыщенный синий;\n- вторичная кнопка — чёрная;\n- модальные окна — белые, с мягкой тенью;\n- затемнение фона при открытии модалки;\n- интерфейс выглядит плотным и функциональным, без лишнего декоративного пространства;\n- визуальный язык должен быть современным, нейтральным и похожим на референс;\n- не добавлять градиенты, glassmorphism, неон или футуристические эффекты, которых нет в видео;\n- не увеличивать скругления без причины;\n- не делать чрезмерно жирные шрифты.\n\nИспользуй системный sans-serif stack, максимально близкий к обычному современному UI:\nInter, Arial, Helvetica, sans-serif.\nЕсли подключается внешний шрифт, размеры и веса должны оставаться визуально близкими к референсу.\n\n==================================================\n2. СТРАНИЦА: ОСНОВНАЯ СТРУКТУРА\n==================================================\n\nВ интерфейсе должна быть следующая структура:\n\nA. Левая вертикальная боковая панель.\nB. Верхняя горизонтальная навигация.\nC. Центральная область товара.\nD. Внизу основной области — блок Included Items.\nE. В нижней части страницы — footer.\nF. В правом нижнем углу — компактная кнопка Chat.\nG. При открытии Gift — модальное окно поверх страницы.\nH. При открытии расширения/панели настроек — отдельная компактная floating panel в правом верхнем углу.\n\nЦентр страницы не должен быть растянут на всю ширину. Контент должен быть ограничен аккуратной рабочей шириной, как на видео.\n\n==================================================\n3. ЛЕВАЯ SIDEBAR\n==================================================\n\nSidebar фиксируется слева и занимает узкую вертикальную колонку.\n\nСтиль:\n- белый фон;\n- вертикальный тонкий border справа;\n- сверху логотип/надпись;\n- ниже имя/профиль;\n- ниже список навигации;\n- элементы списка компактные;\n- иконка слева;\n- текст справа;\n- небольшие интервалы между пунктами;\n- размер текста примерно 11–13px для desktop-референса;\n- активные/важные элементы имеют чуть более заметный фон или контур;\n- sidebar не должен выглядеть массивным.\n\nПункты меню по визуальной логике референса:\n- профиль пользователя;\n- Robux/баланс;\n- Home;\n- Profile;\n- Roblox Plus;\n- Messages;\n- Friends;\n- Avatar;\n- Inventory;\n- Trade;\n- Communities;\n- Newsroom;\n- Official Store;\n- Buy Gift Cards.\n\nУ некоторых пунктов есть маленькие чёрные/тёмные notification badges справа.\nBadge:\n- компактный;\n- чёрный/тёмный;\n- белый текст;\n- маленькая капсула;\n- выровнен по правому краю.\n\nВ нижней части sidebar размести promotional card/banner:\n- прямоугольная рекламная карточка;\n- изображение/баннер;\n- синий/яркий фон изображения;\n- визуально похожий по размеру и расположению на видео;\n- не делай её слишком большой.\n\nSidebar должен оставаться визуально отделённым от основного контента.\n\n==================================================\n4. ВЕРХНЯЯ НАВИГАЦИЯ\n==================================================\n\nСделай горизонтальный header сверху основной страницы.\n\nВизуальная структура:\n- слева логотип;\n- рядом или по центру пункты Charts, Marketplace, Create, Robux;\n- далее длинное поле поиска;\n- справа небольшие иконки/действия;\n- справа баланс пользователя;\n- дополнительные компактные иконки.\n\nHeader:\n- белый или очень светлый;\n- тонкая нижняя граница;\n- высота около 40–48px;\n- все элементы вертикально центрированы;\n- никакого огромного header.\n\nПоисковая строка:\n- светло-серая область;\n- лёгкое скругление;\n- иконка поиска;\n- placeholder «Search»;\n- аккуратный размер;\n- поле визуально занимает больше ширины, чем обычный input.\n\n==================================================\n5. ОСНОВНАЯ ОБЛАСТЬ ТОВАРА\n==================================================\n\nСоздай product page.\n\nОсновной контент расположен примерно по центру/правее sidebar.\n\nСлева:\n- большая светло-серая/очень светлая область предпросмотра товара;\n- внутри — 3D-персонаж/товар;\n- персонаж отображается на нейтральном фоне;\n- под preview расположены маленькие controls;\n- справа от controls может быть кнопка 2D;\n- ниже preview — маленькое действие/метка.\n\nВАЖНО:\n3D-предмет из видео должен визуально занимать примерно ту же долю preview-карточки.\nЕсли реальные 3D-ассеты отсутствуют, используй максимально близкий mock/изображение, но архитектура должна поддерживать замену на настоящий asset.\nМожно сделать CSS/Canvas/SVG mock, если это улучшает сходство.\n\nДобавь анимацию:\n- предмет медленно вращается вокруг вертикальной оси;\n- вращение плавное;\n- без резких скачков;\n- цикл бесконечный;\n- скорость умеренная;\n- при наведении можно слегка менять управление, но базовая анимация должна идти автоматически, как в видео.\n\nКнопка «Try On»:\n- маленькая;\n- серая;\n- прямоугольная;\n- компактная;\n- находится внизу preview.\n\nКнопка «2D»:\n- такая же небольшая;\n- расположена справа от Try On;\n- при переключении меняется preview в 2D-состояние.\n\n==================================================\n6. ПРАВАЯ КОЛОНКА PRODUCT INFO\n==================================================\n\nСправа от preview находится карточка информации о товаре.\n\nСверху:\n- название товара: «Headless Horseman»;\n- строка автора/создателя;\n- маленькая иконка верификации;\n- справа небольшая синяя иконка/индикатор.\n\nНиже:\n- строка Price;\n- иконка валюты/Robux;\n- цена «31,000»;\n- тонкий горизонтальный separator.\n\nОсновные CTA:\n\nBUY:\n- ширина примерно всей колонки;\n- насыщенно-синий background;\n- белый текст;\n- компактная высота;\n- небольшое скругление;\n- hover чуть темнее;\n- active слегка уменьшает/нажимается.\n\nGIFT:\n- ширина такая же;\n- чёрный background;\n- белый текст;\n- ниже Buy;\n- небольшая иконка подарка;\n- hover должен быть заметен, но не агрессивный.\n\nПосле кнопок разместить технические свойства:\n- Tradable — No\n- Type — Characters\n- Placement — Full Body\n- Created — Aug 15, 2018\n- Description — «No, you must believe me. It was a horseman, a dead one. Headless.»\n\nТекст должен быть компактным, выровненным и иметь правильные label/value отношения.\nLabels светлее.\nValues темнее.\n\n==================================================\n7. INCLUDED ITEMS\n==================================================\n\nПод основной строкой preview + product info находится заголовок:\n«Included Items»\n\nНиже горизонтальный список карточек предметов.\n\nКарточка:\n- квадратный/почти квадратный thumbnail;\n- светло-серый фон;\n- небольшие скругления;\n- изображение по центру;\n- название под картинкой;\n- тип предмета мелким шрифтом;\n- карточки расположены в одну строку;\n- не делай огромные карточки.\n\nКоличество карточек — как в видео, около 8 элементов, включая:\n- несколько частей Headless Horseman;\n- различные body/left/right/head элементы;\n- Headless Horseman’s Off Sale Gear;\n- Headless Head;\n- Anime - Mood.\n\nВажно совпадение:\n- одинаковая высота карточек;\n- одинаковые отступы;\n- минимальный gap;\n- подписи могут переноситься на 2 строки;\n- часть карточек имеет однотипные светлые thumbnail backgrounds.\n\nПри горизонтальном переполнении используй аккуратный horizontal scroll, но при 1920px весь ряд должен выглядеть естественно и соответствовать кадру.\n\n==================================================\n8. НИЖНИЙ FOOTER\n==================================================\n\nВнизу страницы расположен минималистичный footer.\n\nРазмести:\n- About Us\n- Jobs\n- Newsroom\n- Parents\n- Buy Gift Cards\n- Help\n- Terms\n- Privacy\n- Accessibility\n- Privacy Choice\n- Sitemap\n\nСлева/снизу:\n- dropdown языка: «English (United States)»\n\nРядом:\n- тонкий серый copyright/legal текст.\n\nFooter не должен быть высоким.\nВ референсе это небольшая нижняя область с большим количеством мелкого текста.\n\n==================================================\n9. CHAT\n==================================================\n\nВ правом нижнем углу:\n- маленькая floating chat button;\n- белый фон;\n- тонкая граница;\n- аккуратное скругление;\n- текст «Chat»;\n- маленькая иконка справа.\n\nПри клике:\n- открывать небольшую chat panel;\n- панель должна появляться с мягкой animation;\n- background white;\n- border;\n- shadow;\n- title Chat;\n- поле ввода;\n- кнопка Send;\n- возможность закрыть окно.\n\nПанель не должна ломать страницу и не должна становиться полноэкранной.\n\n==================================================\n10. СОСТОЯНИЕ №1 — GIFT MODAL\n==================================================\n\nЭто один из главных элементов видео.\n\nПри клике на кнопку Gift:\n- фон страницы затемняется;\n- появляется modal точно по центру;\n- modal белый;\n- ширина примерно 240–260px относительно референса 1920×1080;\n- высота зависит от состояния;\n- border radius небольшой;\n- shadow заметная, но мягкая;\n- modal находится поверх всего;\n- background overlay — полупрозрачный тёмный слой.\n\nВерхняя строка modal:\nслева:\n- маленькая иконка подарка;\n- текст «Send gift»\n\nсправа:\n- иконка/текущее количество Robux;\n- количество;\n- X close button.\n\nHeader modal должен иметь аккуратное вертикальное центрирование.\n\n==================================================\n11. GIFT MODAL: STATE A — ПОИСК ДРУГА\n==================================================\n\nПервое состояние Gift Modal:\n\nВерх:\n«Send gift»\n\nНиже:\n- строка выбранного товара;\n- маленький thumbnail;\n- название Headless Horseman;\n- цена 31,000;\n- небольшой separator.\n\nДалее:\nмаленькая ссылка/действие:\n«Change gift»\n\nЗатем label:\n«Who would you like to gift this to?»\n\nПотом search input:\n- rounded border;\n- иконка поиска;\n- placeholder «Search»;\n- white background;\n- thin gray border;\n- compact height.\n\nНиже:\n«My friends»\n\nСостояние загрузки:\n- показать маленький «Loading...» либо spinner.\n\nПри загрузке сохранить тот же компактный UI.\n\n==================================================\n12. GIFT MODAL: STATE B — СПИСОК ДРУЗЕЙ\n==================================================\n\nПосле окончания загрузки search modal показывает список друзей.\n\nВариант состояния должен выглядеть как в видео:\n\nЗаголовок:\n«My friends (182)»\n\nДалее вертикальный список.\n\nКаждый item:\n- маленький круглый avatar;\n- username;\n- высота строки примерно 34–40px;\n- при hover лёгкий серый фон;\n- cursor pointer.\n\nПримерные username для demo data:\n- yannis4444\n- Astrix_Gaming\n- 00milose735\n- fushyfj55\n\nВ правой части можно показать тонкую scrollbar, если список превышает высоту modal.\n\nПри клике по другу:\n- modal переключается на profile/confirmation state;\n- нужен небольшой slide/fade transition.\n\n==================================================\n13. GIFT MODAL: STATE C — PROFILE CONFIRMATION\n==================================================\n\nПосле выбора друга показать:\n\nВ верхней части:\n- back arrow;\n- avatar выбранного пользователя;\n- username.\n\nПод avatar:\nтри маленькие info cards:\n\n1) Mutual Friends\n2) Joined\n3) Last active\n\nКарточки светло-серые.\nТекст мелкий.\nЧисла/даты компактные.\n\nНиже:\n- thumbnail подарка;\n- название подарка;\n- текст подтверждения вида:\n«Send this gift to Mateax2?»\n\nВ центре крупная цена:\nиконка Robux + «31,000»\n\nВ самом низу:\nсиняя full-width кнопка:\n«Gift»\n\nКнопка должна быть максимально похожа по ширине, высоте и радиусу на видео.\n\n==================================================\n14. GIFT MODAL: STATE D — AFTER GIFT SENT\n==================================================\n\nПосле нажатия Gift:\n\n- не закрывать modal сразу;\n- показать success state;\n- modal по-прежнему центрирован;\n- затемнённый фон остаётся.\n\nВ центре:\n- большой thumbnail подарка;\n- ниже крупный/полужирный текст:\n«Gift sent»\n\nНиже:\nназвание предмета:\n«Headless Horseman»\n\nНиже:\nRobux icon + «31,000»\n\nНиже:\n«To yannis4444» или имя выбранного demo user.\n\nВнизу:\nblue full-width button:\n«Send another gift»\n\nПо поведению:\n- после клика на Send another gift вернуться к состоянию поиска/списка друзей;\n- выбранный пользователь сбрасывается;\n- состояние modal очищается корректно.\n\n==================================================\n15. GIFT MODAL: ВТОРОЙ ПРИМЕР С ДРУГИМ ПОЛЬЗОВАТЕЛЕМ\n==================================================\n\nСделай demo data не статичным только для одного пользователя.\n\nВ интерфейсе должны быть данные, похожие на видео:\n- пользователь yannis4444;\n- вторая цена/набор подарка — 48,000;\n- название подарка может быть «Headless + Korblox»;\n- Mutual Friends: 2;\n- Joined: Mar 4, 2018;\n- Last active: 1 hour ago.\n\nПереключение друга должно менять данные модалки без перезагрузки страницы.\n\n==================================================\n16. ПОКАЗ BALANCE В HEADER И MODAL\n==================================================\n\nВ верхнем header показывай balance пользователя.\nВ gift modal тоже показывай balance.\n\nЗначение demo:\n122,546,312\n\nПосле отправки подарка можно визуально уменьшить баланс:\nнапример до 122,515,312 при отправке за 31,000.\nДля второго демо:\n122,484,312 после дополнительной операции.\n\nНе обязательно соблюдать реальную бухгалтерскую систему; важнее, чтобы UI визуально вел себя как на видео.\n\nДобавь форматирование числа с запятыми.\n\n==================================================\n17. FLOATING SETTINGS PANEL В ПРАВОМ ВЕРХНЕМ УГЛУ\n==================================================\n\nВ одной из сцен видео в правом верхнем углу появляется компактная floating panel.\n\nСделай отдельную кнопку для открытия.\n\nPanel:\n- тёмный navy/почти чёрный background;\n- ширина около 150–170px;\n- маленькое скругление;\n- мягкая тень;\n- позиционирование fixed;\n- top/right небольшой отступ;\n- поверх страницы.\n\nHeader panel:\n- маленькая квадратная иконка/аватар с надписью «MA»;\n- рядом «MA Visuals»\n\nПод ним:\nмаленький label:\n«ROBLOX BALANCE»\n\nНиже:\ndark rounded field/card:\nиконка Robux;\nзначение:\n«122,436,312»\n\nДалее:\ntoggle row:\n«Enabled»\nсправа switch.\n\nSwitch:\n- тонкий;\n- knob;\n- enabled state должен выглядеть синим/фиолетовым;\n- плавная animation.\n\nВнизу:\nfull-width button:\n«Save Settings»\n\nButton:\n- яркий blue/purple;\n- white text;\n- небольшой radius;\n- hover;\n- active.\n\nПри отключении Enabled обновляй state.\nПри Save Settings показывай короткое подтверждение.\n\nВАЖНО:\nэта панель должна быть частью demo-сайта. Не пытайся реально создавать браузерное extension API.\n\n==================================================\n18. MODAL OVERLAY\n==================================================\n\nПри любом крупном модальном окне:\n- блокируй прокрутку body;\n- затемняй всю страницу;\n- overlay плавно появляется;\n- overlay должен находиться ниже modal, но выше всего остального;\n- клик по overlay можно использовать для закрытия только там, где это логично;\n- Esc должен закрывать modal;\n- X всегда должен работать;\n- никакие элементы страницы не должны быть кликабельны сквозь overlay.\n\nOverlay примерно rgba(0,0,0,0.60–0.70), подобрать по видео.\n\n==================================================\n19. АНИМАЦИИ\n==================================================\n\nВсе переходы должны быть плавными и короткими.\n\nИспользуй:\n- opacity;\n- transform: translateY(...);\n- scale(...);\n- transition 120–220ms;\n- ease-out/ease-in-out.\n\nGift modal:\n- появление: opacity 0 → 1 + scale .98 → 1;\n- закрытие: обратная анимация.\n\nFriends list:\n- можно добавить лёгкий fade/slide только если это не нарушает соответствие референсу.\n\nHover:\n- Buttons: очень небольшой darken/lighten;\n- Cards: лёгкое изменение background;\n- Navigation items: небольшой background highlight.\n\nНе использовать:\n- пружинящие bounce-анимации;\n- огромные zoom effects;\n- blur transitions;\n- excessive motion.\n\n==================================================\n20. ТОЧНАЯ ГЕОМЕТРИЯ И SPACING\n==================================================\n\nПриоритетные принципы:\n\n1. Sidebar всегда должен начинаться ровно от левого края контентной области.\n2. Header должен совпадать по вертикали с sidebar.\n3. Центральный product content должен иметь фиксированную рабочую ширину.\n4. Preview и Product Info должны стоять в одной строке.\n5. Included Items должен быть непосредственно под preview/product block.\n6. Footer должен находиться ниже основной области, без гигантской пустой зоны.\n7. Все вертикальные интервалы должны быть компактными.\n8. Никаких случайных больших padding/margin.\n9. Используй box-sizing: border-box на всём документе.\n10. У элементов должны быть стабильные размеры.\n\nВ качестве стартовых ориентиров можно использовать:\n- body font-size: 14px;\n- small labels: 10–12px;\n- main title: 20–24px;\n- product columns: примерно 55/45;\n- modal radius: 8–12px;\n- inputs: 32–38px;\n- buttons: 30–38px;\n- cards: 45–70px thumbnails;\n- sidebar width: примерно 115–125px в масштабе референса.\n\nЗатем ОБЯЗАТЕЛЬНО визуально подогнать размеры относительно видео, а не слепо следовать этим цифрам.\n\n==================================================\n21. ЦВЕТА\n==================================================\n\nНе придумывай новую палитру.\n\nОсновные цвета должны быть близкими к референсу:\n- body: #ffffff / #f7f7f7;\n- borders: очень светлый gray;\n- text: near-black;\n- secondary text: #6b6b6b;\n- primary blue: примерно #3b4ee8 / #4056ea;\n- black CTA: #111111;\n- modal overlay: rgba(0,0,0,.6+).\n\nНе делай сайт полностью серым.\nНе делай primary CTA пурпурным, если в конкретной сцене он синий.\nFloating settings panel допускает более тёмный navy оттенок, как в референсе.\n\n==================================================\n22. ИКОНКИ\n==================================================\n\nИспользуй небольшие минималистичные line icons.\n\nМожно использовать:\n- inline SVG;\n- CSS icons;\n- локальные SVG.\n\nИконки должны быть:\n- тонкими;\n- маленькими;\n- без разноцветных эмодзи;\n- визуально единообразными.\n\nНе используй emoji как UI icons.\n\n==================================================\n23. RESPONSIVE\n==================================================\n\nDesktop:\n- основной reference = 1920×1080.\n\nПри 1440px:\n- сохраняй композицию;\n- аккуратно уменьшай рабочую ширину.\n\nПри 1024px:\n- sidebar можно немного сократить;\n- Included Items может скроллиться по горизонтали.\n\nПри 768px и ниже:\n- sidebar превращается в компактную/скрываемую панель;\n- product columns переходят в вертикальный layout;\n- modal остаётся центрированным;\n- footer переносится.\n\nНо все responsive-решения должны сохранять визуальную логику desktop-референса.\n\n==================================================\n24. ДОСТУПНОСТЬ И UX\n==================================================\n\nДобавь:\n- реальные button/input элементы;\n- aria-label для иконок;\n- keyboard focus;\n- Esc close;\n- tab navigation;\n- корректный disabled state;\n- никакого текста, который нарисован SVG вместо обычного текста, когда это не требуется.\n\n==================================================\n25. СТРУКТУРА КОДА\n==================================================\n\nСоздай минимум:\n\nindex.html\nstyle.css\nscript.js\n\nОпционально:\nassets/\n  product.png\n  avatars/\n  icons/\n\nЕсли ассеты отсутствуют:\n- используй placeholder paths;\n- сделай централизованные переменные для замены assets;\n- не ломай страницу из-за отсутствия отдельных изображений.\n\nКод должен быть чистым:\n- CSS variables;\n- логичные секции;\n- понятные имена классов;\n- без inline-style хаоса;\n- без duplicated CSS;\n- без десятков случайных абсолютных координат.\n\n==================================================\n26. JAVASCRIPT — ЛОГИКА\n==================================================\n\nСделай state-based UI.\n\nМинимальные состояния:\n\nappState = {\n  selectedFriend: null,\n  giftModalOpen: false,\n  giftStep: \"friends-search\" | \"friends-list\" | \"friend-profile\" | \"sent\",\n  settingsOpen: false,\n  extensionEnabled: true,\n  balance: 122546312,\n  previewMode: \"3d\" | \"2d\"\n}\n\nФункции:\n\nopenGift()\ncloseGift()\nshowFriends()\nselectFriend(friend)\nsendGift()\nsendAnotherGift()\nupdateBalance()\ntoggleSettings()\nsaveSettings()\ntogglePreviewMode()\nopenChat()\ncloseChat()\n\nПосле отправки:\n- calculate new balance;\n- обновить header;\n- обновить modal;\n- показать success;\n- не перезагружать страницу.\n\n==================================================\n27. DEMO DATA\n==================================================\n\nfriends:\n[\n  {\n    username: \"yannis4444\",\n    avatar: \"...\",\n    mutualFriends: 6,\n    joined: \"Nov 9, 2021\",\n    lastActive: \"1 day ago\",\n    giftPrice: 31000,\n    giftName: \"Headless Horseman\"\n  },\n  {\n    username: \"Astrix_Gaming\",\n    avatar: \"...\",\n    mutualFriends: 4,\n    joined: \"Jun 12, 2020\",\n    lastActive: \"2 hours ago\",\n    giftPrice: 31000,\n    giftName: \"Headless Horseman\"\n  },\n  {\n    username: \"00milose735\",\n    avatar: \"...\",\n    mutualFriends: 8,\n    joined: \"Jan 18, 2019\",\n    lastActive: \"3 hours ago\",\n    giftPrice: 31000,\n    giftName: \"Headless Horseman\"\n  },\n  {\n    username: \"fushyfj55\",\n    avatar: \"...\",\n    mutualFriends: 3,\n    joined: \"May 8, 2022\",\n    lastActive: \"30 minutes ago\",\n    giftPrice: 31000,\n    giftName: \"Headless Horseman\"\n  }\n]\n\nsecond demo:\n{\n  username: \"yannis4444\",\n  mutualFriends: 2,\n  joined: \"Mar 4, 2018\",\n  lastActive: \"1 hour ago\",\n  giftPrice: 48000,\n  giftName: \"Headless + Korblox\"\n}\n\n==================================================\n28. ТОЧНОЕ ПОВЕДЕНИЕ ПО СЦЕНАРИЮ ВИДЕО\n==================================================\n\nРЕАЛИЗУЙ СЦЕНАРИЙ:\n\nSCENE 1:\n1. Загружается product page.\n2. Виден Headless Horseman.\n3. Товар медленно вращается.\n4. Видны Buy и Gift.\n5. Видны Included Items и footer.\n\nSCENE 2:\n1. Пользователь нажимает Gift.\n2. Страница затемняется.\n3. Появляется Send gift modal.\n4. Показан товар и цена.\n5. Search input.\n6. My friends.\n7. Состояние Loading.\n\nSCENE 3:\n1. Loading исчезает.\n2. Появляется список друзей.\n3. Пользователь выбирает friend.\n4. Modal переходит в profile confirmation.\n\nSCENE 4:\n1. Появляется аватар друга.\n2. Mutual Friends / Joined / Last active.\n3. Gift information.\n4. Цена крупно.\n5. Blue Gift button.\n\nSCENE 5:\n1. Пользователь нажимает Gift.\n2. Показывается success state.\n3. Gift sent.\n4. Цена.\n5. To username.\n6. Send another gift.\n\nSCENE 6:\n1. Пользователь может отправить другой подарок.\n2. Возврат к выбору друга.\n3. Можно выбрать другого пользователя.\n4. Подставляется другое состояние/цена.\n\nSCENE 7:\n1. Закрытие modal.\n2. Возврат к product page.\n3. Страница остаётся в том же scroll position.\n\nSCENE 8:\n1. Открывается floating panel «MA Visuals».\n2. Панель появляется справа сверху.\n3. Показывается ROBLOX BALANCE.\n4. Поле баланса.\n5. Enabled toggle.\n6. Save Settings.\n\n==================================================\n29. ПОВЕДЕНИЕ 2D / 3D\n==================================================\n\nКнопка 2D должна:\n- переключать preview;\n- останавливать 3D вращение;\n- показывать фронтальный 2D image;\n- сохранять размер preview.\n\nПовторный клик возвращает 3D.\n\n==================================================\n30. DETAILS ДЛЯ PIXEL-PERFECT КОПИРОВАНИЯ\n==================================================\n\nПодход:\n- сначала собери semantic DOM;\n- затем визуально выровняй блоки;\n- затем подгони font metrics;\n- затем подгони borders;\n- затем тени;\n- затем animations.\n\nЗапрещено:\n- добавлять лишние карточки;\n- добавлять дополнительные hero sections;\n- делать landing page;\n- добавлять большие заголовки;\n- добавлять градиентный background;\n- делать интерфейс «красивее», если это меняет референс;\n- менять местами sidebar и content;\n- делать мобильный дизайн основным;\n- скрывать важные элементы;\n- оставлять кнопки нефункциональными.\n\n==================================================\n31. PIXEL-PERFECT CHECKLIST\n==================================================\n\nПеред завершением проверь:\n\n[ ] 1920×1080 визуально совпадает с референсом.\n[ ] Sidebar той же визуальной ширины и плотности.\n[ ] Header той же высоты.\n[ ] Product preview слева.\n[ ] Product info справа.\n[ ] Buy синяя.\n[ ] Gift чёрная.\n[ ] Included Items на той же высоте.\n[ ] Footer низкий и компактный.\n[ ] Chat находится справа внизу.\n[ ] Gift modal точно центрирован.\n[ ] Затемнение фона правильной интенсивности.\n[ ] Search input соответствует размеру.\n[ ] Friends list компактный.\n[ ] Profile confirmation соответствует структуре.\n[ ] Success state соответствует.\n[ ] Floating settings panel появляется справа сверху.\n[ ] Toggle работает.\n[ ] Save Settings работает.\n[ ] Balance обновляется.\n[ ] 3D preview вращается.\n[ ] 2D переключение работает.\n[ ] Esc закрывает modal.\n[ ] X закрывает modal.\n[ ] body scroll блокируется на modal.\n[ ] Hover-состояния не чрезмерные.\n[ ] Нет горизонтального overflow на desktop.\n[ ] Нет огромных пустых зон.\n\n==================================================\n32. ПРИНЦИП РАБОТЫ С ВИДЕО\n==================================================\n\nВидео нужно воспринимать как последовательность UI states, а не просто как один screenshot.\n\nНужно воссоздать:\n- статический product state;\n- gift opening;\n- loading;\n- friend list;\n- selected friend;\n- sent;\n- повторную отправку;\n- floating settings panel;\n- вращение товара.\n\nУ каждого состояния должны быть реальные transition-и.\n\nНе вставляй само видео как фон.\nНе делай gif из видео.\nНе делай «fake website» одной картинкой.\nНужен настоящий HTML/CSS/JS интерфейс.\n\n==================================================\n33. ФИНАЛЬНАЯ ТРЕБОВАНИЕ\n==================================================\n\nРЕЗУЛЬТАТ ДОЛЖЕН ВЫГЛЯДЕТЬ ТАК, БУДТО СТРАНИЦА ИЗ ВИДЕО БЫЛА ВОССОЗДАНА В HTML/CSS/JS.\n\nОсновная цель:\nмаксимальное 1:1 визуальное соответствие референсу при 1920×1080.\n\nСначала приоритет:\n1) layout;\n2) spacing;\n3) typography;\n4) sizes;\n5) colors;\n6) borders;\n7) shadows;\n8) interactive states;\n9) animations;\n10) responsive.\n\nНе добавляй собственные дизайнерские решения, если их нет в видео.\n";window.__NEZZX_UI_RULES__={"reference": "provided prompt", "desktop": "1920x1080", "product": "Headless Horseman", "price": 31000, "second_price": 48000, "balance": 122546312, "states": ["friends-search", "friends-list", "friend-profile", "sent"], "components": ["sidebar", "header", "preview", "product-info", "included-items", "footer", "gift-modal", "chat", "settings", "access-gate"]};window.__NEZZX_COMPONENT_CATALOG__=[{"id":"c0000","surface":"sidebar","state":"default","motion":"none","spacing":4},{"id":"c0001","surface":"header","state":"hover","motion":"fade","spacing":6},{"id":"c0002","surface":"preview","state":"active","motion":"slide","spacing":7},{"id":"c0003","surface":"product","state":"focus","motion":"scale","spacing":8},{"id":"c0004","surface":"items","state":"loading","motion":"rotate","spacing":9},{"id":"c0005","surface":"footer","state":"success","motion":"none","spacing":10},{"id":"c0006","surface":"gift","state":"disabled","motion":"fade","spacing":12},{"id":"c0007","surface":"chat","state":"default","motion":"slide","spacing":14},{"id":"c0008","surface":"settings","state":"hover","motion":"scale","spacing":16},{"id":"c0009","surface":"login","state":"active","motion":"rotate","spacing":18},{"id":"c0010","surface":"sidebar","state":"focus","motion":"none","spacing":20},{"id":"c0011","surface":"header","state":"loading","motion":"fade","spacing":22},{"id":"c0012","surface":"preview","state":"success","motion":"slide","spacing":24},{"id":"c0013","surface":"product","state":"disabled","motion":"scale","spacing":4},{"id":"c0014","surface":"items","state":"default","motion":"rotate","spacing":6},{"id":"c0015","surface":"footer","state":"hover","motion":"none","spacing":7},{"id":"c0016","surface":"gift","state":"active","motion":"fade","spacing":8},{"id":"c0017","surface":"chat","state":"focus","motion":"slide","spacing":9},{"id":"c0018","surface":"settings","state":"loading","motion":"scale","spacing":10},{"id":"c0019","surface":"login","state":"success","motion":"rotate","spacing":12},{"id":"c0020","surface":"sidebar","state":"disabled","motion":"none","spacing":14},{"id":"c0021","surface":"header","state":"default","motion":"fade","spacing":16},{"id":"c0022","surface":"preview","state":"hover","motion":"slide","spacing":18},{"id":"c0023","surface":"product","state":"active","motion":"scale","spacing":20},{"id":"c0024","surface":"items","state":"focus","motion":"rotate","spacing":22},{"id":"c0025","surface":"footer","state":"loading","motion":"none","spacing":24},{"id":"c0026","surface":"gift","state":"success","motion":"fade","spacing":4},{"id":"c0027","surface":"chat","state":"disabled","motion":"slide","spacing":6},{"id":"c0028","surface":"settings","state":"default","motion":"scale","spacing":7},{"id":"c0029","surface":"login","state":"hover","motion":"rotate","spacing":8},{"id":"c0030","surface":"sidebar","state":"active","motion":"none","spacing":9},{"id":"c0031","surface":"header","state":"focus","motion":"fade","spacing":10},{"id":"c0032","surface":"preview","state":"loading","motion":"slide","spacing":12},{"id":"c0033","surface":"product","state":"success","motion":"scale","spacing":14},{"id":"c0034","surface":"items","state":"disabled","motion":"rotate","spacing":16},{"id":"c0035","surface":"footer","state":"default","motion":"none","spacing":18},{"id":"c0036","surface":"gift","state":"hover","motion":"fade","spacing":20},{"id":"c0037","surface":"chat","state":"active","motion":"slide","spacing":22},{"id":"c0038","surface":"settings","state":"focus","motion":"scale","spacing":24},{"id":"c0039","surface":"login","state":"loading","motion":"rotate","spacing":4},{"id":"c0040","surface":"sidebar","state":"success","motion":"none","spacing":6},{"id":"c0041","surface":"header","state":"disabled","motion":"fade","spacing":7},{"id":"c0042","surface":"preview","state":"default","motion":"slide","spacing":8},{"id":"c0043","surface":"product","state":"hover","motion":"scale","spacing":9},{"id":"c0044","surface":"items","state":"active","motion":"rotate","spacing":10},{"id":"c0045","surface":"footer","state":"focus","motion":"none","spacing":12},{"id":"c0046","surface":"gift","state":"loading","motion":"fade","spacing":14},{"id":"c0047","surface":"chat","state":"success","motion":"slide","spacing":16},{"id":"c0048","surface":"settings","state":"disabled","motion":"scale","spacing":18},{"id":"c0049","surface":"login","state":"default","motion":"rotate","spacing":20},{"id":"c0050","surface":"sidebar","state":"hover","motion":"none","spacing":22},{"id":"c0051","surface":"header","state":"active","motion":"fade","spacing":24},{"id":"c0052","surface":"preview","state":"focus","motion":"slide","spacing":4},{"id":"c0053","surface":"product","state":"loading","motion":"scale","spacing":6},{"id":"c0054","surface":"items","state":"success","motion":"rotate","spacing":7},{"id":"c0055","surface":"footer","state":"disabled","motion":"none","spacing":8},{"id":"c0056","surface":"gift","state":"default","motion":"fade","spacing":9},{"id":"c0057","surface":"chat","state":"hover","motion":"slide","spacing":10},{"id":"c0058","surface":"settings","state":"active","motion":"scale","spacing":12},{"id":"c0059","surface":"login","state":"focus","motion":"rotate","spacing":14},{"id":"c0060","surface":"sidebar","state":"loading","motion":"none","spacing":16},{"id":"c0061","surface":"header","state":"success","motion":"fade","spacing":18},{"id":"c0062","surface":"preview","state":"disabled","motion":"slide","spacing":20},{"id":"c0063","surface":"product","state":"default","motion":"scale","spacing":22},{"id":"c0064","surface":"items","state":"hover","motion":"rotate","spacing":24},{"id":"c0065","surface":"footer","state":"active","motion":"none","spacing":4},{"id":"c0066","surface":"gift","state":"focus","motion":"fade","spacing":6},{"id":"c0067","surface":"chat","state":"loading","motion":"slide","spacing":7},{"id":"c0068","surface":"settings","state":"success","motion":"scale","spacing":8},{"id":"c0069","surface":"login","state":"disabled","motion":"rotate","spacing":9},{"id":"c0070","surface":"sidebar","state":"default","motion":"none","spacing":10},{"id":"c0071","surface":"header","state":"hover","motion":"fade","spacing":12},{"id":"c0072","surface":"preview","state":"active","motion":"slide","spacing":14},{"id":"c0073","surface":"product","state":"focus","motion":"scale","spacing":16},{"id":"c0074","surface":"items","state":"loading","motion":"rotate","spacing":18},{"id":"c0075","surface":"footer","state":"success","motion":"none","spacing":20},{"id":"c0076","surface":"gift","state":"disabled","motion":"fade","spacing":22},{"id":"c0077","surface":"chat","state":"default","motion":"slide","spacing":24},{"id":"c0078","surface":"settings","state":"hover","motion":"scale","spacing":4},{"id":"c0079","surface":"login","state":"active","motion":"rotate","spacing":6},{"id":"c0080","surface":"sidebar","state":"focus","motion":"none","spacing":7},{"id":"c0081","surface":"header","state":"loading","motion":"fade","spacing":8},{"id":"c0082","surface":"preview","state":"success","motion":"slide","spacing":9},{"id":"c0083","surface":"product","state":"disabled","motion":"scale","spacing":10},{"id":"c0084","surface":"items","state":"default","motion":"rotate","spacing":12},{"id":"c0085","surface":"footer","state":"hover","motion":"none","spacing":14},{"id":"c0086","surface":"gift","state":"active","motion":"fade","spacing":16},{"id":"c0087","surface":"chat","state":"focus","motion":"slide","spacing":18},{"id":"c0088","surface":"settings","state":"loading","motion":"scale","spacing":20},{"id":"c0089","surface":"login","state":"success","motion":"rotate","spacing":22},{"id":"c0090","surface":"sidebar","state":"disabled","motion":"none","spacing":24},{"id":"c0091","surface":"header","state":"default","motion":"fade","spacing":4},{"id":"c0092","surface":"preview","state":"hover","motion":"slide","spacing":6},{"id":"c0093","surface":"product","state":"active","motion":"scale","spacing":7},{"id":"c0094","surface":"items","state":"focus","motion":"rotate","spacing":8},{"id":"c0095","surface":"footer","state":"loading","motion":"none","spacing":9},{"id":"c0096","surface":"gift","state":"success","motion":"fade","spacing":10},{"id":"c0097","surface":"chat","state":"disabled","motion":"slide","spacing":12},{"id":"c0098","surface":"settings","state":"default","motion":"scale","spacing":14},{"id":"c0099","surface":"login","state":"hover","motion":"rotate","spacing":16},{"id":"c0100","surface":"sidebar","state":"active","motion":"none","spacing":18},{"id":"c0101","surface":"header","state":"focus","motion":"fade","spacing":20},{"id":"c0102","surface":"preview","state":"loading","motion":"slide","spacing":22},{"id":"c0103","surface":"product","state":"success","motion":"scale","spacing":24},{"id":"c0104","surface":"items","state":"disabled","motion":"rotate","spacing":4},{"id":"c0105","surface":"footer","state":"default","motion":"none","spacing":6},{"id":"c0106","surface":"gift","state":"hover","motion":"fade","spacing":7},{"id":"c0107","surface":"chat","state":"active","motion":"slide","spacing":8},{"id":"c0108","surface":"settings","state":"focus","motion":"scale","spacing":9},{"id":"c0109","surface":"login","state":"loading","motion":"rotate","spacing":10},{"id":"c0110","surface":"sidebar","state":"success","motion":"none","spacing":12},{"id":"c0111","surface":"header","state":"disabled","motion":"fade","spacing":14},{"id":"c0112","surface":"preview","state":"default","motion":"slide","spacing":16},{"id":"c0113","surface":"product","state":"hover","motion":"scale","spacing":18},{"id":"c0114","surface":"items","state":"active","motion":"rotate","spacing":20},{"id":"c0115","surface":"footer","state":"focus","motion":"none","spacing":22},{"id":"c0116","surface":"gift","state":"loading","motion":"fade","spacing":24},{"id":"c0117","surface":"chat","state":"success","motion":"slide","spacing":4},{"id":"c0118","surface":"settings","state":"disabled","motion":"scale","spacing":6},{"id":"c0119","surface":"login","state":"default","motion":"rotate","spacing":7},{"id":"c0120","surface":"sidebar","state":"hover","motion":"none","spacing":8},{"id":"c0121","surface":"header","state":"active","motion":"fade","spacing":9},{"id":"c0122","surface":"preview","state":"focus","motion":"slide","spacing":10},{"id":"c0123","surface":"product","state":"loading","motion":"scale","spacing":12},{"id":"c0124","surface":"items","state":"success","motion":"rotate","spacing":14},{"id":"c0125","surface":"footer","state":"disabled","motion":"none","spacing":16},{"id":"c0126","surface":"gift","state":"default","motion":"fade","spacing":18},{"id":"c0127","surface":"chat","state":"hover","motion":"slide","spacing":20},{"id":"c0128","surface":"settings","state":"active","motion":"scale","spacing":22},{"id":"c0129","surface":"login","state":"focus","motion":"rotate","spacing":24},{"id":"c0130","surface":"sidebar","state":"loading","motion":"none","spacing":4},{"id":"c0131","surface":"header","state":"success","motion":"fade","spacing":6},{"id":"c0132","surface":"preview","state":"disabled","motion":"slide","spacing":7},{"id":"c0133","surface":"product","state":"default","motion":"scale","spacing":8},{"id":"c0134","surface":"items","state":"hover","motion":"rotate","spacing":9},{"id":"c0135","surface":"footer","state":"active","motion":"none","spacing":10},{"id":"c0136","surface":"gift","state":"focus","motion":"fade","spacing":12},{"id":"c0137","surface":"chat","state":"loading","motion":"slide","spacing":14},{"id":"c0138","surface":"settings","state":"success","motion":"scale","spacing":16},{"id":"c0139","surface":"login","state":"disabled","motion":"rotate","spacing":18},{"id":"c0140","surface":"sidebar","state":"default","motion":"none","spacing":20},{"id":"c0141","surface":"header","state":"hover","motion":"fade","spacing":22},{"id":"c0142","surface":"preview","state":"active","motion":"slide","spacing":24},{"id":"c0143","surface":"product","state":"focus","motion":"scale","spacing":4},{"id":"c0144","surface":"items","state":"loading","motion":"rotate","spacing":6},{"id":"c0145","surface":"footer","state":"success","motion":"none","spacing":7},{"id":"c0146","surface":"gift","state":"disabled","motion":"fade","spacing":8},{"id":"c0147","surface":"chat","state":"default","motion":"slide","spacing":9},{"id":"c0148","surface":"settings","state":"hover","motion":"scale","spacing":10},{"id":"c0149","surface":"login","state":"active","motion":"rotate","spacing":12},{"id":"c0150","surface":"sidebar","state":"focus","motion":"none","spacing":14},{"id":"c0151","surface":"header","state":"loading","motion":"fade","spacing":16},{"id":"c0152","surface":"preview","state":"success","motion":"slide","spacing":18},{"id":"c0153","surface":"product","state":"disabled","motion":"scale","spacing":20},{"id":"c0154","surface":"items","state":"default","motion":"rotate","spacing":22},{"id":"c0155","surface":"footer","state":"hover","motion":"none","spacing":24},{"id":"c0156","surface":"gift","state":"active","motion":"fade","spacing":4},{"id":"c0157","surface":"chat","state":"focus","motion":"slide","spacing":6},{"id":"c0158","surface":"settings","state":"loading","motion":"scale","spacing":7},{"id":"c0159","surface":"login","state":"success","motion":"rotate","spacing":8},{"id":"c0160","surface":"sidebar","state":"disabled","motion":"none","spacing":9},{"id":"c0161","surface":"header","state":"default","motion":"fade","spacing":10},{"id":"c0162","surface":"preview","state":"hover","motion":"slide","spacing":12},{"id":"c0163","surface":"product","state":"active","motion":"scale","spacing":14},{"id":"c0164","surface":"items","state":"focus","motion":"rotate","spacing":16},{"id":"c0165","surface":"footer","state":"loading","motion":"none","spacing":18},{"id":"c0166","surface":"gift","state":"success","motion":"fade","spacing":20},{"id":"c0167","surface":"chat","state":"disabled","motion":"slide","spacing":22},{"id":"c0168","surface":"settings","state":"default","motion":"scale","spacing":24},{"id":"c0169","surface":"login","state":"hover","motion":"rotate","spacing":4},{"id":"c0170","surface":"sidebar","state":"active","motion":"none","spacing":6},{"id":"c0171","surface":"header","state":"focus","motion":"fade","spacing":7},{"id":"c0172","surface":"preview","state":"loading","motion":"slide","spacing":8},{"id":"c0173","surface":"product","state":"success","motion":"scale","spacing":9},{"id":"c0174","surface":"items","state":"disabled","motion":"rotate","spacing":10},{"id":"c0175","surface":"footer","state":"default","motion":"none","spacing":12},{"id":"c0176","surface":"gift","state":"hover","motion":"fade","spacing":14},{"id":"c0177","surface":"chat","state":"active","motion":"slide","spacing":16},{"id":"c0178","surface":"settings","state":"focus","motion":"scale","spacing":18},{"id":"c0179","surface":"login","state":"loading","motion":"rotate","spacing":20},{"id":"c0180","surface":"sidebar","state":"success","motion":"none","spacing":22},{"id":"c0181","surface":"header","state":"disabled","motion":"fade","spacing":24},{"id":"c0182","surface":"preview","state":"default","motion":"slide","spacing":4},{"id":"c0183","surface":"product","state":"hover","motion":"scale","spacing":6},{"id":"c0184","surface":"items","state":"active","motion":"rotate","spacing":7},{"id":"c0185","surface":"footer","state":"focus","motion":"none","spacing":8},{"id":"c0186","surface":"gift","state":"loading","motion":"fade","spacing":9},{"id":"c0187","surface":"chat","state":"success","motion":"slide","spacing":10},{"id":"c0188","surface":"settings","state":"disabled","motion":"scale","spacing":12},{"id":"c0189","surface":"login","state":"default","motion":"rotate","spacing":14},{"id":"c0190","surface":"sidebar","state":"hover","motion":"none","spacing":16},{"id":"c0191","surface":"header","state":"active","motion":"fade","spacing":18},{"id":"c0192","surface":"preview","state":"focus","motion":"slide","spacing":20},{"id":"c0193","surface":"product","state":"loading","motion":"scale","spacing":22},{"id":"c0194","surface":"items","state":"success","motion":"rotate","spacing":24},{"id":"c0195","surface":"footer","state":"disabled","motion":"none","spacing":4},{"id":"c0196","surface":"gift","state":"default","motion":"fade","spacing":6},{"id":"c0197","surface":"chat","state":"hover","motion":"slide","spacing":7},{"id":"c0198","surface":"settings","state":"active","motion":"scale","spacing":8},{"id":"c0199","surface":"login","state":"focus","motion":"rotate","spacing":9},{"id":"c0200","surface":"sidebar","state":"loading","motion":"none","spacing":10},{"id":"c0201","surface":"header","state":"success","motion":"fade","spacing":12},{"id":"c0202","surface":"preview","state":"disabled","motion":"slide","spacing":14},{"id":"c0203","surface":"product","state":"default","motion":"scale","spacing":16},{"id":"c0204","surface":"items","state":"hover","motion":"rotate","spacing":18},{"id":"c0205","surface":"footer","state":"active","motion":"none","spacing":20},{"id":"c0206","surface":"gift","state":"focus","motion":"fade","spacing":22},{"id":"c0207","surface":"chat","state":"loading","motion":"slide","spacing":24},{"id":"c0208","surface":"settings","state":"success","motion":"scale","spacing":4},{"id":"c0209","surface":"login","state":"disabled","motion":"rotate","spacing":6},{"id":"c0210","surface":"sidebar","state":"default","motion":"none","spacing":7},{"id":"c0211","surface":"header","state":"hover","motion":"fade","spacing":8},{"id":"c0212","surface":"preview","state":"active","motion":"slide","spacing":9},{"id":"c0213","surface":"product","state":"focus","motion":"scale","spacing":10},{"id":"c0214","surface":"items","state":"loading","motion":"rotate","spacing":12},{"id":"c0215","surface":"footer","state":"success","motion":"none","spacing":14},{"id":"c0216","surface":"gift","state":"disabled","motion":"fade","spacing":16},{"id":"c0217","surface":"chat","state":"default","motion":"slide","spacing":18},{"id":"c0218","surface":"settings","state":"hover","motion":"scale","spacing":20},{"id":"c0219","surface":"login","state":"active","motion":"rotate","spacing":22},{"id":"c0220","surface":"sidebar","state":"focus","motion":"none","spacing":24},{"id":"c0221","surface":"header","state":"loading","motion":"fade","spacing":4},{"id":"c0222","surface":"preview","state":"success","motion":"slide","spacing":6},{"id":"c0223","surface":"product","state":"disabled","motion":"scale","spacing":7},{"id":"c0224","surface":"items","state":"default","motion":"rotate","spacing":8},{"id":"c0225","surface":"footer","state":"hover","motion":"none","spacing":9},{"id":"c0226","surface":"gift","state":"active","motion":"fade","spacing":10},{"id":"c0227","surface":"chat","state":"focus","motion":"slide","spacing":12},{"id":"c0228","surface":"settings","state":"loading","motion":"scale","spacing":14},{"id":"c0229","surface":"login","state":"success","motion":"rotate","spacing":16},{"id":"c0230","surface":"sidebar","state":"disabled","motion":"none","spacing":18},{"id":"c0231","surface":"header","state":"default","motion":"fade","spacing":20},{"id":"c0232","surface":"preview","state":"hover","motion":"slide","spacing":22},{"id":"c0233","surface":"product","state":"active","motion":"scale","spacing":24},{"id":"c0234","surface":"items","state":"focus","motion":"rotate","spacing":4},{"id":"c0235","surface":"footer","state":"loading","motion":"none","spacing":6},{"id":"c0236","surface":"gift","state":"success","motion":"fade","spacing":7},{"id":"c0237","surface":"chat","state":"disabled","motion":"slide","spacing":8},{"id":"c0238","surface":"settings","state":"default","motion":"scale","spacing":9},{"id":"c0239","surface":"login","state":"hover","motion":"rotate","spacing":10},{"id":"c0240","surface":"sidebar","state":"active","motion":"none","spacing":12},{"id":"c0241","surface":"header","state":"focus","motion":"fade","spacing":14},{"id":"c0242","surface":"preview","state":"loading","motion":"slide","spacing":16},{"id":"c0243","surface":"product","state":"success","motion":"scale","spacing":18},{"id":"c0244","surface":"items","state":"disabled","motion":"rotate","spacing":20},{"id":"c0245","surface":"footer","state":"default","motion":"none","spacing":22},{"id":"c0246","surface":"gift","state":"hover","motion":"fade","spacing":24},{"id":"c0247","surface":"chat","state":"active","motion":"slide","spacing":4},{"id":"c0248","surface":"settings","state":"focus","motion":"scale","spacing":6},{"id":"c0249","surface":"login","state":"loading","motion":"rotate","spacing":7},{"id":"c0250","surface":"sidebar","state":"success","motion":"none","spacing":8},{"id":"c0251","surface":"header","state":"disabled","motion":"fade","spacing":9},{"id":"c0252","surface":"preview","state":"default","motion":"slide","spacing":10},{"id":"c0253","surface":"product","state":"hover","motion":"scale","spacing":12},{"id":"c0254","surface":"items","state":"active","motion":"rotate","spacing":14},{"id":"c0255","surface":"footer","state":"focus","motion":"none","spacing":16},{"id":"c0256","surface":"gift","state":"loading","motion":"fade","spacing":18},{"id":"c0257","surface":"chat","state":"success","motion":"slide","spacing":20},{"id":"c0258","surface":"settings","state":"disabled","motion":"scale","spacing":22},{"id":"c0259","surface":"login","state":"default","motion":"rotate","spacing":24},{"id":"c0260","surface":"sidebar","state":"hover","motion":"none","spacing":4},{"id":"c0261","surface":"header","state":"active","motion":"fade","spacing":6},{"id":"c0262","surface":"preview","state":"focus","motion":"slide","spacing":7},{"id":"c0263","surface":"product","state":"loading","motion":"scale","spacing":8},{"id":"c0264","surface":"items","state":"success","motion":"rotate","spacing":9},{"id":"c0265","surface":"footer","state":"disabled","motion":"none","spacing":10},{"id":"c0266","surface":"gift","state":"default","motion":"fade","spacing":12},{"id":"c0267","surface":"chat","state":"hover","motion":"slide","spacing":14},{"id":"c0268","surface":"settings","state":"active","motion":"scale","spacing":16},{"id":"c0269","surface":"login","state":"focus","motion":"rotate","spacing":18},{"id":"c0270","surface":"sidebar","state":"loading","motion":"none","spacing":20},{"id":"c0271","surface":"header","state":"success","motion":"fade","spacing":22},{"id":"c0272","surface":"preview","state":"disabled","motion":"slide","spacing":24},{"id":"c0273","surface":"product","state":"default","motion":"scale","spacing":4},{"id":"c0274","surface":"items","state":"hover","motion":"rotate","spacing":6},{"id":"c0275","surface":"footer","state":"active","motion":"none","spacing":7},{"id":"c0276","surface":"gift","state":"focus","motion":"fade","spacing":8},{"id":"c0277","surface":"chat","state":"loading","motion":"slide","spacing":9},{"id":"c0278","surface":"settings","state":"success","motion":"scale","spacing":10},{"id":"c0279","surface":"login","state":"disabled","motion":"rotate","spacing":12},{"id":"c0280","surface":"sidebar","state":"default","motion":"none","spacing":14},{"id":"c0281","surface":"header","state":"hover","motion":"fade","spacing":16},{"id":"c0282","surface":"preview","state":"active","motion":"slide","spacing":18},{"id":"c0283","surface":"product","state":"focus","motion":"scale","spacing":20},{"id":"c0284","surface":"items","state":"loading","motion":"rotate","spacing":22},{"id":"c0285","surface":"footer","state":"success","motion":"none","spacing":24},{"id":"c0286","surface":"gift","state":"disabled","motion":"fade","spacing":4},{"id":"c0287","surface":"chat","state":"default","motion":"slide","spacing":6},{"id":"c0288","surface":"settings","state":"hover","motion":"scale","spacing":7},{"id":"c0289","surface":"login","state":"active","motion":"rotate","spacing":8},{"id":"c0290","surface":"sidebar","state":"focus","motion":"none","spacing":9},{"id":"c0291","surface":"header","state":"loading","motion":"fade","spacing":10},{"id":"c0292","surface":"preview","state":"success","motion":"slide","spacing":12},{"id":"c0293","surface":"product","state":"disabled","motion":"scale","spacing":14},{"id":"c0294","surface":"items","state":"default","motion":"rotate","spacing":16},{"id":"c0295","surface":"footer","state":"hover","motion":"none","spacing":18},{"id":"c0296","surface":"gift","state":"active","motion":"fade","spacing":20},{"id":"c0297","surface":"chat","state":"focus","motion":"slide","spacing":22},{"id":"c0298","surface":"settings","state":"loading","motion":"scale","spacing":24},{"id":"c0299","surface":"login","state":"success","motion":"rotate","spacing":4},{"id":"c0300","surface":"sidebar","state":"disabled","motion":"none","spacing":6},{"id":"c0301","surface":"header","state":"default","motion":"fade","spacing":7},{"id":"c0302","surface":"preview","state":"hover","motion":"slide","spacing":8},{"id":"c0303","surface":"product","state":"active","motion":"scale","spacing":9},{"id":"c0304","surface":"items","state":"focus","motion":"rotate","spacing":10},{"id":"c0305","surface":"footer","state":"loading","motion":"none","spacing":12},{"id":"c0306","surface":"gift","state":"success","motion":"fade","spacing":14},{"id":"c0307","surface":"chat","state":"disabled","motion":"slide","spacing":16},{"id":"c0308","surface":"settings","state":"default","motion":"scale","spacing":18},{"id":"c0309","surface":"login","state":"hover","motion":"rotate","spacing":20},{"id":"c0310","surface":"sidebar","state":"active","motion":"none","spacing":22},{"id":"c0311","surface":"header","state":"focus","motion":"fade","spacing":24},{"id":"c0312","surface":"preview","state":"loading","motion":"slide","spacing":4},{"id":"c0313","surface":"product","state":"success","motion":"scale","spacing":6},{"id":"c0314","surface":"items","state":"disabled","motion":"rotate","spacing":7},{"id":"c0315","surface":"footer","state":"default","motion":"none","spacing":8},{"id":"c0316","surface":"gift","state":"hover","motion":"fade","spacing":9},{"id":"c0317","surface":"chat","state":"active","motion":"slide","spacing":10},{"id":"c0318","surface":"settings","state":"focus","motion":"scale","spacing":12},{"id":"c0319","surface":"login","state":"loading","motion":"rotate","spacing":14},{"id":"c0320","surface":"sidebar","state":"success","motion":"none","spacing":16},{"id":"c0321","surface":"header","state":"disabled","motion":"fade","spacing":18},{"id":"c0322","surface":"preview","state":"default","motion":"slide","spacing":20},{"id":"c0323","surface":"product","state":"hover","motion":"scale","spacing":22},{"id":"c0324","surface":"items","state":"active","motion":"rotate","spacing":24},{"id":"c0325","surface":"footer","state":"focus","motion":"none","spacing":4},{"id":"c0326","surface":"gift","state":"loading","motion":"fade","spacing":6},{"id":"c0327","surface":"chat","state":"success","motion":"slide","spacing":7},{"id":"c0328","surface":"settings","state":"disabled","motion":"scale","spacing":8},{"id":"c0329","surface":"login","state":"default","motion":"rotate","spacing":9},{"id":"c0330","surface":"sidebar","state":"hover","motion":"none","spacing":10},{"id":"c0331","surface":"header","state":"active","motion":"fade","spacing":12},{"id":"c0332","surface":"preview","state":"focus","motion":"slide","spacing":14},{"id":"c0333","surface":"product","state":"loading","motion":"scale","spacing":16},{"id":"c0334","surface":"items","state":"success","motion":"rotate","spacing":18},{"id":"c0335","surface":"footer","state":"disabled","motion":"none","spacing":20},{"id":"c0336","surface":"gift","state":"default","motion":"fade","spacing":22},{"id":"c0337","surface":"chat","state":"hover","motion":"slide","spacing":24},{"id":"c0338","surface":"settings","state":"active","motion":"scale","spacing":4},{"id":"c0339","surface":"login","state":"focus","motion":"rotate","spacing":6},{"id":"c0340","surface":"sidebar","state":"loading","motion":"none","spacing":7},{"id":"c0341","surface":"header","state":"success","motion":"fade","spacing":8},{"id":"c0342","surface":"preview","state":"disabled","motion":"slide","spacing":9},{"id":"c0343","surface":"product","state":"default","motion":"scale","spacing":10},{"id":"c0344","surface":"items","state":"hover","motion":"rotate","spacing":12},{"id":"c0345","surface":"footer","state":"active","motion":"none","spacing":14},{"id":"c0346","surface":"gift","state":"focus","motion":"fade","spacing":16},{"id":"c0347","surface":"chat","state":"loading","motion":"slide","spacing":18},{"id":"c0348","surface":"settings","state":"success","motion":"scale","spacing":20},{"id":"c0349","surface":"login","state":"disabled","motion":"rotate","spacing":22},{"id":"c0350","surface":"sidebar","state":"default","motion":"none","spacing":24},{"id":"c0351","surface":"header","state":"hover","motion":"fade","spacing":4},{"id":"c0352","surface":"preview","state":"active","motion":"slide","spacing":6},{"id":"c0353","surface":"product","state":"focus","motion":"scale","spacing":7},{"id":"c0354","surface":"items","state":"loading","motion":"rotate","spacing":8},{"id":"c0355","surface":"footer","state":"success","motion":"none","spacing":9},{"id":"c0356","surface":"gift","state":"disabled","motion":"fade","spacing":10},{"id":"c0357","surface":"chat","state":"default","motion":"slide","spacing":12},{"id":"c0358","surface":"settings","state":"hover","motion":"scale","spacing":14},{"id":"c0359","surface":"login","state":"active","motion":"rotate","spacing":16},{"id":"c0360","surface":"sidebar","state":"focus","motion":"none","spacing":18},{"id":"c0361","surface":"header","state":"loading","motion":"fade","spacing":20},{"id":"c0362","surface":"preview","state":"success","motion":"slide","spacing":22},{"id":"c0363","surface":"product","state":"disabled","motion":"scale","spacing":24},{"id":"c0364","surface":"items","state":"default","motion":"rotate","spacing":4},{"id":"c0365","surface":"footer","state":"hover","motion":"none","spacing":6},{"id":"c0366","surface":"gift","state":"active","motion":"fade","spacing":7},{"id":"c0367","surface":"chat","state":"focus","motion":"slide","spacing":8},{"id":"c0368","surface":"settings","state":"loading","motion":"scale","spacing":9},{"id":"c0369","surface":"login","state":"success","motion":"rotate","spacing":10},{"id":"c0370","surface":"sidebar","state":"disabled","motion":"none","spacing":12},{"id":"c0371","surface":"header","state":"default","motion":"fade","spacing":14},{"id":"c0372","surface":"preview","state":"hover","motion":"slide","spacing":16},{"id":"c0373","surface":"product","state":"active","motion":"scale","spacing":18},{"id":"c0374","surface":"items","state":"focus","motion":"rotate","spacing":20},{"id":"c0375","surface":"footer","state":"loading","motion":"none","spacing":22},{"id":"c0376","surface":"gift","state":"success","motion":"fade","spacing":24},{"id":"c0377","surface":"chat","state":"disabled","motion":"slide","spacing":4},{"id":"c0378","surface":"settings","state":"default","motion":"scale","spacing":6},{"id":"c0379","surface":"login","state":"hover","motion":"rotate","spacing":7},{"id":"c0380","surface":"sidebar","state":"active","motion":"none","spacing":8},{"id":"c0381","surface":"header","state":"focus","motion":"fade","spacing":9},{"id":"c0382","surface":"preview","state":"loading","motion":"slide","spacing":10},{"id":"c0383","surface":"product","state":"success","motion":"scale","spacing":12},{"id":"c0384","surface":"items","state":"disabled","motion":"rotate","spacing":14},{"id":"c0385","surface":"footer","state":"default","motion":"none","spacing":16},{"id":"c0386","surface":"gift","state":"hover","motion":"fade","spacing":18},{"id":"c0387","surface":"chat","state":"active","motion":"slide","spacing":20},{"id":"c0388","surface":"settings","state":"focus","motion":"scale","spacing":22},{"id":"c0389","surface":"login","state":"loading","motion":"rotate","spacing":24},{"id":"c0390","surface":"sidebar","state":"success","motion":"none","spacing":4},{"id":"c0391","surface":"header","state":"disabled","motion":"fade","spacing":6},{"id":"c0392","surface":"preview","state":"default","motion":"slide","spacing":7},{"id":"c0393","surface":"product","state":"hover","motion":"scale","spacing":8},{"id":"c0394","surface":"items","state":"active","motion":"rotate","spacing":9},{"id":"c0395","surface":"footer","state":"focus","motion":"none","spacing":10},{"id":"c0396","surface":"gift","state":"loading","motion":"fade","spacing":12},{"id":"c0397","surface":"chat","state":"success","motion":"slide","spacing":14},{"id":"c0398","surface":"settings","state":"disabled","motion":"scale","spacing":16},{"id":"c0399","surface":"login","state":"default","motion":"rotate","spacing":18},{"id":"c0400","surface":"sidebar","state":"hover","motion":"none","spacing":20},{"id":"c0401","surface":"header","state":"active","motion":"fade","spacing":22},{"id":"c0402","surface":"preview","state":"focus","motion":"slide","spacing":24},{"id":"c0403","surface":"product","state":"loading","motion":"scale","spacing":4},{"id":"c0404","surface":"items","state":"success","motion":"rotate","spacing":6},{"id":"c0405","surface":"footer","state":"disabled","motion":"none","spacing":7},{"id":"c0406","surface":"gift","state":"default","motion":"fade","spacing":8},{"id":"c0407","surface":"chat","state":"hover","motion":"slide","spacing":9},{"id":"c0408","surface":"settings","state":"active","motion":"scale","spacing":10},{"id":"c0409","surface":"login","state":"focus","motion":"rotate","spacing":12},{"id":"c0410","surface":"sidebar","state":"loading","motion":"none","spacing":14},{"id":"c0411","surface":"header","state":"success","motion":"fade","spacing":16},{"id":"c0412","surface":"preview","state":"disabled","motion":"slide","spacing":18},{"id":"c0413","surface":"product","state":"default","motion":"scale","spacing":20},{"id":"c0414","surface":"items","state":"hover","motion":"rotate","spacing":22},{"id":"c0415","surface":"footer","state":"active","motion":"none","spacing":24},{"id":"c0416","surface":"gift","state":"focus","motion":"fade","spacing":4},{"id":"c0417","surface":"chat","state":"loading","motion":"slide","spacing":6},{"id":"c0418","surface":"settings","state":"success","motion":"scale","spacing":7},{"id":"c0419","surface":"login","state":"disabled","motion":"rotate","spacing":8},{"id":"c0420","surface":"sidebar","state":"default","motion":"none","spacing":9},{"id":"c0421","surface":"header","state":"hover","motion":"fade","spacing":10},{"id":"c0422","surface":"preview","state":"active","motion":"slide","spacing":12},{"id":"c0423","surface":"product","state":"focus","motion":"scale","spacing":14},{"id":"c0424","surface":"items","state":"loading","motion":"rotate","spacing":16},{"id":"c0425","surface":"footer","state":"success","motion":"none","spacing":18},{"id":"c0426","surface":"gift","state":"disabled","motion":"fade","spacing":20},{"id":"c0427","surface":"chat","state":"default","motion":"slide","spacing":22},{"id":"c0428","surface":"settings","state":"hover","motion":"scale","spacing":24},{"id":"c0429","surface":"login","state":"active","motion":"rotate","spacing":4},{"id":"c0430","surface":"sidebar","state":"focus","motion":"none","spacing":6},{"id":"c0431","surface":"header","state":"loading","motion":"fade","spacing":7},{"id":"c0432","surface":"preview","state":"success","motion":"slide","spacing":8},{"id":"c0433","surface":"product","state":"disabled","motion":"scale","spacing":9},{"id":"c0434","surface":"items","state":"default","motion":"rotate","spacing":10},{"id":"c0435","surface":"footer","state":"hover","motion":"none","spacing":12},{"id":"c0436","surface":"gift","state":"active","motion":"fade","spacing":14},{"id":"c0437","surface":"chat","state":"focus","motion":"slide","spacing":16},{"id":"c0438","surface":"settings","state":"loading","motion":"scale","spacing":18},{"id":"c0439","surface":"login","state":"success","motion":"rotate","spacing":20},{"id":"c0440","surface":"sidebar","state":"disabled","motion":"none","spacing":22},{"id":"c0441","surface":"header","state":"default","motion":"fade","spacing":24},{"id":"c0442","surface":"preview","state":"hover","motion":"slide","spacing":4},{"id":"c0443","surface":"product","state":"active","motion":"scale","spacing":6},{"id":"c0444","surface":"items","state":"focus","motion":"rotate","spacing":7},{"id":"c0445","surface":"footer","state":"loading","motion":"none","spacing":8},{"id":"c0446","surface":"gift","state":"success","motion":"fade","spacing":9},{"id":"c0447","surface":"chat","state":"disabled","motion":"slide","spacing":10},{"id":"c0448","surface":"settings","state":"default","motion":"scale","spacing":12},{"id":"c0449","surface":"login","state":"hover","motion":"rotate","spacing":14},{"id":"c0450","surface":"sidebar","state":"active","motion":"none","spacing":16},{"id":"c0451","surface":"header","state":"focus","motion":"fade","spacing":18},{"id":"c0452","surface":"preview","state":"loading","motion":"slide","spacing":20},{"id":"c0453","surface":"product","state":"success","motion":"scale","spacing":22},{"id":"c0454","surface":"items","state":"disabled","motion":"rotate","spacing":24},{"id":"c0455","surface":"footer","state":"default","motion":"none","spacing":4},{"id":"c0456","surface":"gift","state":"hover","motion":"fade","spacing":6},{"id":"c0457","surface":"chat","state":"active","motion":"slide","spacing":7},{"id":"c0458","surface":"settings","state":"focus","motion":"scale","spacing":8},{"id":"c0459","surface":"login","state":"loading","motion":"rotate","spacing":9},{"id":"c0460","surface":"sidebar","state":"success","motion":"none","spacing":10},{"id":"c0461","surface":"header","state":"disabled","motion":"fade","spacing":12},{"id":"c0462","surface":"preview","state":"default","motion":"slide","spacing":14},{"id":"c0463","surface":"product","state":"hover","motion":"scale","spacing":16},{"id":"c0464","surface":"items","state":"active","motion":"rotate","spacing":18},{"id":"c0465","surface":"footer","state":"focus","motion":"none","spacing":20},{"id":"c0466","surface":"gift","state":"loading","motion":"fade","spacing":22},{"id":"c0467","surface":"chat","state":"success","motion":"slide","spacing":24},{"id":"c0468","surface":"settings","state":"disabled","motion":"scale","spacing":4},{"id":"c0469","surface":"login","state":"default","motion":"rotate","spacing":6},{"id":"c0470","surface":"sidebar","state":"hover","motion":"none","spacing":7},{"id":"c0471","surface":"header","state":"active","motion":"fade","spacing":8},{"id":"c0472","surface":"preview","state":"focus","motion":"slide","spacing":9},{"id":"c0473","surface":"product","state":"loading","motion":"scale","spacing":10},{"id":"c0474","surface":"items","state":"success","motion":"rotate","spacing":12},{"id":"c0475","surface":"footer","state":"disabled","motion":"none","spacing":14},{"id":"c0476","surface":"gift","state":"default","motion":"fade","spacing":16},{"id":"c0477","surface":"chat","state":"hover","motion":"slide","spacing":18},{"id":"c0478","surface":"settings","state":"active","motion":"scale","spacing":20},{"id":"c0479","surface":"login","state":"focus","motion":"rotate","spacing":22},{"id":"c0480","surface":"sidebar","state":"loading","motion":"none","spacing":24},{"id":"c0481","surface":"header","state":"success","motion":"fade","spacing":4},{"id":"c0482","surface":"preview","state":"disabled","motion":"slide","spacing":6},{"id":"c0483","surface":"product","state":"default","motion":"scale","spacing":7},{"id":"c0484","surface":"items","state":"hover","motion":"rotate","spacing":8},{"id":"c0485","surface":"footer","state":"active","motion":"none","spacing":9},{"id":"c0486","surface":"gift","state":"focus","motion":"fade","spacing":10},{"id":"c0487","surface":"chat","state":"loading","motion":"slide","spacing":12},{"id":"c0488","surface":"settings","state":"success","motion":"scale","spacing":14},{"id":"c0489","surface":"login","state":"disabled","motion":"rotate","spacing":16},{"id":"c0490","surface":"sidebar","state":"default","motion":"none","spacing":18},{"id":"c0491","surface":"header","state":"hover","motion":"fade","spacing":20},{"id":"c0492","surface":"preview","state":"active","motion":"slide","spacing":22},{"id":"c0493","surface":"product","state":"focus","motion":"scale","spacing":24},{"id":"c0494","surface":"items","state":"loading","motion":"rotate","spacing":4},{"id":"c0495","surface":"footer","state":"success","motion":"none","spacing":6},{"id":"c0496","surface":"gift","state":"disabled","motion":"fade","spacing":7},{"id":"c0497","surface":"chat","state":"default","motion":"slide","spacing":8},{"id":"c0498","surface":"settings","state":"hover","motion":"scale","spacing":9},{"id":"c0499","surface":"login","state":"active","motion":"rotate","spacing":10},{"id":"c0500","surface":"sidebar","state":"focus","motion":"none","spacing":12},{"id":"c0501","surface":"header","state":"loading","motion":"fade","spacing":14},{"id":"c0502","surface":"preview","state":"success","motion":"slide","spacing":16},{"id":"c0503","surface":"product","state":"disabled","motion":"scale","spacing":18},{"id":"c0504","surface":"items","state":"default","motion":"rotate","spacing":20},{"id":"c0505","surface":"footer","state":"hover","motion":"none","spacing":22},{"id":"c0506","surface":"gift","state":"active","motion":"fade","spacing":24},{"id":"c0507","surface":"chat","state":"focus","motion":"slide","spacing":4},{"id":"c0508","surface":"settings","state":"loading","motion":"scale","spacing":6},{"id":"c0509","surface":"login","state":"success","motion":"rotate","spacing":7},{"id":"c0510","surface":"sidebar","state":"disabled","motion":"none","spacing":8},{"id":"c0511","surface":"header","state":"default","motion":"fade","spacing":9},{"id":"c0512","surface":"preview","state":"hover","motion":"slide","spacing":10},{"id":"c0513","surface":"product","state":"active","motion":"scale","spacing":12},{"id":"c0514","surface":"items","state":"focus","motion":"rotate","spacing":14},{"id":"c0515","surface":"footer","state":"loading","motion":"none","spacing":16},{"id":"c0516","surface":"gift","state":"success","motion":"fade","spacing":18},{"id":"c0517","surface":"chat","state":"disabled","motion":"slide","spacing":20},{"id":"c0518","surface":"settings","state":"default","motion":"scale","spacing":22},{"id":"c0519","surface":"login","state":"hover","motion":"rotate","spacing":24},{"id":"c0520","surface":"sidebar","state":"active","motion":"none","spacing":4},{"id":"c0521","surface":"header","state":"focus","motion":"fade","spacing":6},{"id":"c0522","surface":"preview","state":"loading","motion":"slide","spacing":7},{"id":"c0523","surface":"product","state":"success","motion":"scale","spacing":8},{"id":"c0524","surface":"items","state":"disabled","motion":"rotate","spacing":9},{"id":"c0525","surface":"footer","state":"default","motion":"none","spacing":10},{"id":"c0526","surface":"gift","state":"hover","motion":"fade","spacing":12},{"id":"c0527","surface":"chat","state":"active","motion":"slide","spacing":14},{"id":"c0528","surface":"settings","state":"focus","motion":"scale","spacing":16},{"id":"c0529","surface":"login","state":"loading","motion":"rotate","spacing":18},{"id":"c0530","surface":"sidebar","state":"success","motion":"none","spacing":20},{"id":"c0531","surface":"header","state":"disabled","motion":"fade","spacing":22},{"id":"c0532","surface":"preview","state":"default","motion":"slide","spacing":24},{"id":"c0533","surface":"product","state":"hover","motion":"scale","spacing":4},{"id":"c0534","surface":"items","state":"active","motion":"rotate","spacing":6},{"id":"c0535","surface":"footer","state":"focus","motion":"none","spacing":7},{"id":"c0536","surface":"gift","state":"loading","motion":"fade","spacing":8},{"id":"c0537","surface":"chat","state":"success","motion":"slide","spacing":9},{"id":"c0538","surface":"settings","state":"disabled","motion":"scale","spacing":10},{"id":"c0539","surface":"login","state":"default","motion":"rotate","spacing":12},{"id":"c0540","surface":"sidebar","state":"hover","motion":"none","spacing":14},{"id":"c0541","surface":"header","state":"active","motion":"fade","spacing":16},{"id":"c0542","surface":"preview","state":"focus","motion":"slide","spacing":18},{"id":"c0543","surface":"product","state":"loading","motion":"scale","spacing":20},{"id":"c0544","surface":"items","state":"success","motion":"rotate","spacing":22},{"id":"c0545","surface":"footer","state":"disabled","motion":"none","spacing":24},{"id":"c0546","surface":"gift","state":"default","motion":"fade","spacing":4},{"id":"c0547","surface":"chat","state":"hover","motion":"slide","spacing":6},{"id":"c0548","surface":"settings","state":"active","motion":"scale","spacing":7},{"id":"c0549","surface":"login","state":"focus","motion":"rotate","spacing":8},{"id":"c0550","surface":"sidebar","state":"loading","motion":"none","spacing":9},{"id":"c0551","surface":"header","state":"success","motion":"fade","spacing":10},{"id":"c0552","surface":"preview","state":"disabled","motion":"slide","spacing":12},{"id":"c0553","surface":"product","state":"default","motion":"scale","spacing":14},{"id":"c0554","surface":"items","state":"hover","motion":"rotate","spacing":16},{"id":"c0555","surface":"footer","state":"active","motion":"none","spacing":18},{"id":"c0556","surface":"gift","state":"focus","motion":"fade","spacing":20},{"id":"c0557","surface":"chat","state":"loading","motion":"slide","spacing":22},{"id":"c0558","surface":"settings","state":"success","motion":"scale","spacing":24},{"id":"c0559","surface":"login","state":"disabled","motion":"rotate","spacing":4},{"id":"c0560","surface":"sidebar","state":"default","motion":"none","spacing":6},{"id":"c0561","surface":"header","state":"hover","motion":"fade","spacing":7},{"id":"c0562","surface":"preview","state":"active","motion":"slide","spacing":8},{"id":"c0563","surface":"product","state":"focus","motion":"scale","spacing":9},{"id":"c0564","surface":"items","state":"loading","motion":"rotate","spacing":10},{"id":"c0565","surface":"footer","state":"success","motion":"none","spacing":12},{"id":"c0566","surface":"gift","state":"disabled","motion":"fade","spacing":14},{"id":"c0567","surface":"chat","state":"default","motion":"slide","spacing":16},{"id":"c0568","surface":"settings","state":"hover","motion":"scale","spacing":18},{"id":"c0569","surface":"login","state":"active","motion":"rotate","spacing":20},{"id":"c0570","surface":"sidebar","state":"focus","motion":"none","spacing":22},{"id":"c0571","surface":"header","state":"loading","motion":"fade","spacing":24},{"id":"c0572","surface":"preview","state":"success","motion":"slide","spacing":4},{"id":"c0573","surface":"product","state":"disabled","motion":"scale","spacing":6},{"id":"c0574","surface":"items","state":"default","motion":"rotate","spacing":7},{"id":"c0575","surface":"footer","state":"hover","motion":"none","spacing":8},{"id":"c0576","surface":"gift","state":"active","motion":"fade","spacing":9},{"id":"c0577","surface":"chat","state":"focus","motion":"slide","spacing":10},{"id":"c0578","surface":"settings","state":"loading","motion":"scale","spacing":12},{"id":"c0579","surface":"login","state":"success","motion":"rotate","spacing":14},{"id":"c0580","surface":"sidebar","state":"disabled","motion":"none","spacing":16},{"id":"c0581","surface":"header","state":"default","motion":"fade","spacing":18},{"id":"c0582","surface":"preview","state":"hover","motion":"slide","spacing":20},{"id":"c0583","surface":"product","state":"active","motion":"scale","spacing":22},{"id":"c0584","surface":"items","state":"focus","motion":"rotate","spacing":24},{"id":"c0585","surface":"footer","state":"loading","motion":"none","spacing":4},{"id":"c0586","surface":"gift","state":"success","motion":"fade","spacing":6},{"id":"c0587","surface":"chat","state":"disabled","motion":"slide","spacing":7},{"id":"c0588","surface":"settings","state":"default","motion":"scale","spacing":8},{"id":"c0589","surface":"login","state":"hover","motion":"rotate","spacing":9},{"id":"c0590","surface":"sidebar","state":"active","motion":"none","spacing":10},{"id":"c0591","surface":"header","state":"focus","motion":"fade","spacing":12},{"id":"c0592","surface":"preview","state":"loading","motion":"slide","spacing":14},{"id":"c0593","surface":"product","state":"success","motion":"scale","spacing":16},{"id":"c0594","surface":"items","state":"disabled","motion":"rotate","spacing":18},{"id":"c0595","surface":"footer","state":"default","motion":"none","spacing":20},{"id":"c0596","surface":"gift","state":"hover","motion":"fade","spacing":22},{"id":"c0597","surface":"chat","state":"active","motion":"slide","spacing":24},{"id":"c0598","surface":"settings","state":"focus","motion":"scale","spacing":4},{"id":"c0599","surface":"login","state":"loading","motion":"rotate","spacing":6},{"id":"c0600","surface":"sidebar","state":"success","motion":"none","spacing":7},{"id":"c0601","surface":"header","state":"disabled","motion":"fade","spacing":8},{"id":"c0602","surface":"preview","state":"default","motion":"slide","spacing":9},{"id":"c0603","surface":"product","state":"hover","motion":"scale","spacing":10},{"id":"c0604","surface":"items","state":"active","motion":"rotate","spacing":12},{"id":"c0605","surface":"footer","state":"focus","motion":"none","spacing":14},{"id":"c0606","surface":"gift","state":"loading","motion":"fade","spacing":16},{"id":"c0607","surface":"chat","state":"success","motion":"slide","spacing":18},{"id":"c0608","surface":"settings","state":"disabled","motion":"scale","spacing":20},{"id":"c0609","surface":"login","state":"default","motion":"rotate","spacing":22},{"id":"c0610","surface":"sidebar","state":"hover","motion":"none","spacing":24},{"id":"c0611","surface":"header","state":"active","motion":"fade","spacing":4},{"id":"c0612","surface":"preview","state":"focus","motion":"slide","spacing":6},{"id":"c0613","surface":"product","state":"loading","motion":"scale","spacing":7},{"id":"c0614","surface":"items","state":"success","motion":"rotate","spacing":8},{"id":"c0615","surface":"footer","state":"disabled","motion":"none","spacing":9},{"id":"c0616","surface":"gift","state":"default","motion":"fade","spacing":10},{"id":"c0617","surface":"chat","state":"hover","motion":"slide","spacing":12},{"id":"c0618","surface":"settings","state":"active","motion":"scale","spacing":14},{"id":"c0619","surface":"login","state":"focus","motion":"rotate","spacing":16},{"id":"c0620","surface":"sidebar","state":"loading","motion":"none","spacing":18},{"id":"c0621","surface":"header","state":"success","motion":"fade","spacing":20},{"id":"c0622","surface":"preview","state":"disabled","motion":"slide","spacing":22},{"id":"c0623","surface":"product","state":"default","motion":"scale","spacing":24},{"id":"c0624","surface":"items","state":"hover","motion":"rotate","spacing":4},{"id":"c0625","surface":"footer","state":"active","motion":"none","spacing":6},{"id":"c0626","surface":"gift","state":"focus","motion":"fade","spacing":7},{"id":"c0627","surface":"chat","state":"loading","motion":"slide","spacing":8},{"id":"c0628","surface":"settings","state":"success","motion":"scale","spacing":9},{"id":"c0629","surface":"login","state":"disabled","motion":"rotate","spacing":10},{"id":"c0630","surface":"sidebar","state":"default","motion":"none","spacing":12},{"id":"c0631","surface":"header","state":"hover","motion":"fade","spacing":14},{"id":"c0632","surface":"preview","state":"active","motion":"slide","spacing":16},{"id":"c0633","surface":"product","state":"focus","motion":"scale","spacing":18},{"id":"c0634","surface":"items","state":"loading","motion":"rotate","spacing":20},{"id":"c0635","surface":"footer","state":"success","motion":"none","spacing":22},{"id":"c0636","surface":"gift","state":"disabled","motion":"fade","spacing":24},{"id":"c0637","surface":"chat","state":"default","motion":"slide","spacing":4},{"id":"c0638","surface":"settings","state":"hover","motion":"scale","spacing":6},{"id":"c0639","surface":"login","state":"active","motion":"rotate","spacing":7},{"id":"c0640","surface":"sidebar","state":"focus","motion":"none","spacing":8},{"id":"c0641","surface":"header","state":"loading","motion":"fade","spacing":9},{"id":"c0642","surface":"preview","state":"success","motion":"slide","spacing":10},{"id":"c0643","surface":"product","state":"disabled","motion":"scale","spacing":12},{"id":"c0644","surface":"items","state":"default","motion":"rotate","spacing":14},{"id":"c0645","surface":"footer","state":"hover","motion":"none","spacing":16},{"id":"c0646","surface":"gift","state":"active","motion":"fade","spacing":18},{"id":"c0647","surface":"chat","state":"focus","motion":"slide","spacing":20},{"id":"c0648","surface":"settings","state":"loading","motion":"scale","spacing":22},{"id":"c0649","surface":"login","state":"success","motion":"rotate","spacing":24},{"id":"c0650","surface":"sidebar","state":"disabled","motion":"none","spacing":4},{"id":"c0651","surface":"header","state":"default","motion":"fade","spacing":6},{"id":"c0652","surface":"preview","state":"hover","motion":"slide","spacing":7},{"id":"c0653","surface":"product","state":"active","motion":"scale","spacing":8},{"id":"c0654","surface":"items","state":"focus","motion":"rotate","spacing":9},{"id":"c0655","surface":"footer","state":"loading","motion":"none","spacing":10},{"id":"c0656","surface":"gift","state":"success","motion":"fade","spacing":12},{"id":"c0657","surface":"chat","state":"disabled","motion":"slide","spacing":14},{"id":"c0658","surface":"settings","state":"default","motion":"scale","spacing":16},{"id":"c0659","surface":"login","state":"hover","motion":"rotate","spacing":18},{"id":"c0660","surface":"sidebar","state":"active","motion":"none","spacing":20},{"id":"c0661","surface":"header","state":"focus","motion":"fade","spacing":22},{"id":"c0662","surface":"preview","state":"loading","motion":"slide","spacing":24},{"id":"c0663","surface":"product","state":"success","motion":"scale","spacing":4},{"id":"c0664","surface":"items","state":"disabled","motion":"rotate","spacing":6},{"id":"c0665","surface":"footer","state":"default","motion":"none","spacing":7},{"id":"c0666","surface":"gift","state":"hover","motion":"fade","spacing":8},{"id":"c0667","surface":"chat","state":"active","motion":"slide","spacing":9},{"id":"c0668","surface":"settings","state":"focus","motion":"scale","spacing":10},{"id":"c0669","surface":"login","state":"loading","motion":"rotate","spacing":12},{"id":"c0670","surface":"sidebar","state":"success","motion":"none","spacing":14},{"id":"c0671","surface":"header","state":"disabled","motion":"fade","spacing":16},{"id":"c0672","surface":"preview","state":"default","motion":"slide","spacing":18},{"id":"c0673","surface":"product","state":"hover","motion":"scale","spacing":20},{"id":"c0674","surface":"items","state":"active","motion":"rotate","spacing":22},{"id":"c0675","surface":"footer","state":"focus","motion":"none","spacing":24},{"id":"c0676","surface":"gift","state":"loading","motion":"fade","spacing":4},{"id":"c0677","surface":"chat","state":"success","motion":"slide","spacing":6},{"id":"c0678","surface":"settings","state":"disabled","motion":"scale","spacing":7},{"id":"c0679","surface":"login","state":"default","motion":"rotate","spacing":8},{"id":"c0680","surface":"sidebar","state":"hover","motion":"none","spacing":9},{"id":"c0681","surface":"header","state":"active","motion":"fade","spacing":10},{"id":"c0682","surface":"preview","state":"focus","motion":"slide","spacing":12},{"id":"c0683","surface":"product","state":"loading","motion":"scale","spacing":14},{"id":"c0684","surface":"items","state":"success","motion":"rotate","spacing":16},{"id":"c0685","surface":"footer","state":"disabled","motion":"none","spacing":18},{"id":"c0686","surface":"gift","state":"default","motion":"fade","spacing":20},{"id":"c0687","surface":"chat","state":"hover","motion":"slide","spacing":22},{"id":"c0688","surface":"settings","state":"active","motion":"scale","spacing":24},{"id":"c0689","surface":"login","state":"focus","motion":"rotate","spacing":4},{"id":"c0690","surface":"sidebar","state":"loading","motion":"none","spacing":6},{"id":"c0691","surface":"header","state":"success","motion":"fade","spacing":7},{"id":"c0692","surface":"preview","state":"disabled","motion":"slide","spacing":8},{"id":"c0693","surface":"product","state":"default","motion":"scale","spacing":9},{"id":"c0694","surface":"items","state":"hover","motion":"rotate","spacing":10},{"id":"c0695","surface":"footer","state":"active","motion":"none","spacing":12},{"id":"c0696","surface":"gift","state":"focus","motion":"fade","spacing":14},{"id":"c0697","surface":"chat","state":"loading","motion":"slide","spacing":16},{"id":"c0698","surface":"settings","state":"success","motion":"scale","spacing":18},{"id":"c0699","surface":"login","state":"disabled","motion":"rotate","spacing":20},{"id":"c0700","surface":"sidebar","state":"default","motion":"none","spacing":22},{"id":"c0701","surface":"header","state":"hover","motion":"fade","spacing":24},{"id":"c0702","surface":"preview","state":"active","motion":"slide","spacing":4},{"id":"c0703","surface":"product","state":"focus","motion":"scale","spacing":6},{"id":"c0704","surface":"items","state":"loading","motion":"rotate","spacing":7},{"id":"c0705","surface":"footer","state":"success","motion":"none","spacing":8},{"id":"c0706","surface":"gift","state":"disabled","motion":"fade","spacing":9},{"id":"c0707","surface":"chat","state":"default","motion":"slide","spacing":10},{"id":"c0708","surface":"settings","state":"hover","motion":"scale","spacing":12},{"id":"c0709","surface":"login","state":"active","motion":"rotate","spacing":14},{"id":"c0710","surface":"sidebar","state":"focus","motion":"none","spacing":16},{"id":"c0711","surface":"header","state":"loading","motion":"fade","spacing":18},{"id":"c0712","surface":"preview","state":"success","motion":"slide","spacing":20},{"id":"c0713","surface":"product","state":"disabled","motion":"scale","spacing":22},{"id":"c0714","surface":"items","state":"default","motion":"rotate","spacing":24},{"id":"c0715","surface":"footer","state":"hover","motion":"none","spacing":4},{"id":"c0716","surface":"gift","state":"active","motion":"fade","spacing":6},{"id":"c0717","surface":"chat","state":"focus","motion":"slide","spacing":7},{"id":"c0718","surface":"settings","state":"loading","motion":"scale","spacing":8},{"id":"c0719","surface":"login","state":"success","motion":"rotate","spacing":9},{"id":"c0720","surface":"sidebar","state":"disabled","motion":"none","spacing":10},{"id":"c0721","surface":"header","state":"default","motion":"fade","spacing":12},{"id":"c0722","surface":"preview","state":"hover","motion":"slide","spacing":14},{"id":"c0723","surface":"product","state":"active","motion":"scale","spacing":16},{"id":"c0724","surface":"items","state":"focus","motion":"rotate","spacing":18},{"id":"c0725","surface":"footer","state":"loading","motion":"none","spacing":20},{"id":"c0726","surface":"gift","state":"success","motion":"fade","spacing":22},{"id":"c0727","surface":"chat","state":"disabled","motion":"slide","spacing":24},{"id":"c0728","surface":"settings","state":"default","motion":"scale","spacing":4},{"id":"c0729","surface":"login","state":"hover","motion":"rotate","spacing":6},{"id":"c0730","surface":"sidebar","state":"active","motion":"none","spacing":7},{"id":"c0731","surface":"header","state":"focus","motion":"fade","spacing":8},{"id":"c0732","surface":"preview","state":"loading","motion":"slide","spacing":9},{"id":"c0733","surface":"product","state":"success","motion":"scale","spacing":10},{"id":"c0734","surface":"items","state":"disabled","motion":"rotate","spacing":12},{"id":"c0735","surface":"footer","state":"default","motion":"none","spacing":14},{"id":"c0736","surface":"gift","state":"hover","motion":"fade","spacing":16},{"id":"c0737","surface":"chat","state":"active","motion":"slide","spacing":18},{"id":"c0738","surface":"settings","state":"focus","motion":"scale","spacing":20},{"id":"c0739","surface":"login","state":"loading","motion":"rotate","spacing":22},{"id":"c0740","surface":"sidebar","state":"success","motion":"none","spacing":24},{"id":"c0741","surface":"header","state":"disabled","motion":"fade","spacing":4},{"id":"c0742","surface":"preview","state":"default","motion":"slide","spacing":6},{"id":"c0743","surface":"product","state":"hover","motion":"scale","spacing":7},{"id":"c0744","surface":"items","state":"active","motion":"rotate","spacing":8},{"id":"c0745","surface":"footer","state":"focus","motion":"none","spacing":9},{"id":"c0746","surface":"gift","state":"loading","motion":"fade","spacing":10},{"id":"c0747","surface":"chat","state":"success","motion":"slide","spacing":12},{"id":"c0748","surface":"settings","state":"disabled","motion":"scale","spacing":14},{"id":"c0749","surface":"login","state":"default","motion":"rotate","spacing":16},{"id":"c0750","surface":"sidebar","state":"hover","motion":"none","spacing":18},{"id":"c0751","surface":"header","state":"active","motion":"fade","spacing":20},{"id":"c0752","surface":"preview","state":"focus","motion":"slide","spacing":22},{"id":"c0753","surface":"product","state":"loading","motion":"scale","spacing":24},{"id":"c0754","surface":"items","state":"success","motion":"rotate","spacing":4},{"id":"c0755","surface":"footer","state":"disabled","motion":"none","spacing":6},{"id":"c0756","surface":"gift","state":"default","motion":"fade","spacing":7},{"id":"c0757","surface":"chat","state":"hover","motion":"slide","spacing":8},{"id":"c0758","surface":"settings","state":"active","motion":"scale","spacing":9},{"id":"c0759","surface":"login","state":"focus","motion":"rotate","spacing":10},{"id":"c0760","surface":"sidebar","state":"loading","motion":"none","spacing":12},{"id":"c0761","surface":"header","state":"success","motion":"fade","spacing":14},{"id":"c0762","surface":"preview","state":"disabled","motion":"slide","spacing":16},{"id":"c0763","surface":"product","state":"default","motion":"scale","spacing":18},{"id":"c0764","surface":"items","state":"hover","motion":"rotate","spacing":20},{"id":"c0765","surface":"footer","state":"active","motion":"none","spacing":22},{"id":"c0766","surface":"gift","state":"focus","motion":"fade","spacing":24},{"id":"c0767","surface":"chat","state":"loading","motion":"slide","spacing":4},{"id":"c0768","surface":"settings","state":"success","motion":"scale","spacing":6},{"id":"c0769","surface":"login","state":"disabled","motion":"rotate","spacing":7},{"id":"c0770","surface":"sidebar","state":"default","motion":"none","spacing":8},{"id":"c0771","surface":"header","state":"hover","motion":"fade","spacing":9},{"id":"c0772","surface":"preview","state":"active","motion":"slide","spacing":10},{"id":"c0773","surface":"product","state":"focus","motion":"scale","spacing":12},{"id":"c0774","surface":"items","state":"loading","motion":"rotate","spacing":14},{"id":"c0775","surface":"footer","state":"success","motion":"none","spacing":16},{"id":"c0776","surface":"gift","state":"disabled","motion":"fade","spacing":18},{"id":"c0777","surface":"chat","state":"default","motion":"slide","spacing":20},{"id":"c0778","surface":"settings","state":"hover","motion":"scale","spacing":22},{"id":"c0779","surface":"login","state":"active","motion":"rotate","spacing":24},{"id":"c0780","surface":"sidebar","state":"focus","motion":"none","spacing":4},{"id":"c0781","surface":"header","state":"loading","motion":"fade","spacing":6},{"id":"c0782","surface":"preview","state":"success","motion":"slide","spacing":7},{"id":"c0783","surface":"product","state":"disabled","motion":"scale","spacing":8},{"id":"c0784","surface":"items","state":"default","motion":"rotate","spacing":9},{"id":"c0785","surface":"footer","state":"hover","motion":"none","spacing":10},{"id":"c0786","surface":"gift","state":"active","motion":"fade","spacing":12},{"id":"c0787","surface":"chat","state":"focus","motion":"slide","spacing":14},{"id":"c0788","surface":"settings","state":"loading","motion":"scale","spacing":16},{"id":"c0789","surface":"login","state":"success","motion":"rotate","spacing":18},{"id":"c0790","surface":"sidebar","state":"disabled","motion":"none","spacing":20},{"id":"c0791","surface":"header","state":"default","motion":"fade","spacing":22},{"id":"c0792","surface":"preview","state":"hover","motion":"slide","spacing":24},{"id":"c0793","surface":"product","state":"active","motion":"scale","spacing":4},{"id":"c0794","surface":"items","state":"focus","motion":"rotate","spacing":6},{"id":"c0795","surface":"footer","state":"loading","motion":"none","spacing":7},{"id":"c0796","surface":"gift","state":"success","motion":"fade","spacing":8},{"id":"c0797","surface":"chat","state":"disabled","motion":"slide","spacing":9},{"id":"c0798","surface":"settings","state":"default","motion":"scale","spacing":10},{"id":"c0799","surface":"login","state":"hover","motion":"rotate","spacing":12},{"id":"c0800","surface":"sidebar","state":"active","motion":"none","spacing":14},{"id":"c0801","surface":"header","state":"focus","motion":"fade","spacing":16},{"id":"c0802","surface":"preview","state":"loading","motion":"slide","spacing":18},{"id":"c0803","surface":"product","state":"success","motion":"scale","spacing":20},{"id":"c0804","surface":"items","state":"disabled","motion":"rotate","spacing":22},{"id":"c0805","surface":"footer","state":"default","motion":"none","spacing":24},{"id":"c0806","surface":"gift","state":"hover","motion":"fade","spacing":4},{"id":"c0807","surface":"chat","state":"active","motion":"slide","spacing":6},{"id":"c0808","surface":"settings","state":"focus","motion":"scale","spacing":7},{"id":"c0809","surface":"login","state":"loading","motion":"rotate","spacing":8},{"id":"c0810","surface":"sidebar","state":"success","motion":"none","spacing":9},{"id":"c0811","surface":"header","state":"disabled","motion":"fade","spacing":10},{"id":"c0812","surface":"preview","state":"default","motion":"slide","spacing":12},{"id":"c0813","surface":"product","state":"hover","motion":"scale","spacing":14},{"id":"c0814","surface":"items","state":"active","motion":"rotate","spacing":16},{"id":"c0815","surface":"footer","state":"focus","motion":"none","spacing":18},{"id":"c0816","surface":"gift","state":"loading","motion":"fade","spacing":20},{"id":"c0817","surface":"chat","state":"success","motion":"slide","spacing":22},{"id":"c0818","surface":"settings","state":"disabled","motion":"scale","spacing":24},{"id":"c0819","surface":"login","state":"default","motion":"rotate","spacing":4},{"id":"c0820","surface":"sidebar","state":"hover","motion":"none","spacing":6},{"id":"c0821","surface":"header","state":"active","motion":"fade","spacing":7},{"id":"c0822","surface":"preview","state":"focus","motion":"slide","spacing":8},{"id":"c0823","surface":"product","state":"loading","motion":"scale","spacing":9},{"id":"c0824","surface":"items","state":"success","motion":"rotate","spacing":10},{"id":"c0825","surface":"footer","state":"disabled","motion":"none","spacing":12},{"id":"c0826","surface":"gift","state":"default","motion":"fade","spacing":14},{"id":"c0827","surface":"chat","state":"hover","motion":"slide","spacing":16},{"id":"c0828","surface":"settings","state":"active","motion":"scale","spacing":18},{"id":"c0829","surface":"login","state":"focus","motion":"rotate","spacing":20},{"id":"c0830","surface":"sidebar","state":"loading","motion":"none","spacing":22},{"id":"c0831","surface":"header","state":"success","motion":"fade","spacing":24},{"id":"c0832","surface":"preview","state":"disabled","motion":"slide","spacing":4},{"id":"c0833","surface":"product","state":"default","motion":"scale","spacing":6},{"id":"c0834","surface":"items","state":"hover","motion":"rotate","spacing":7},{"id":"c0835","surface":"footer","state":"active","motion":"none","spacing":8},{"id":"c0836","surface":"gift","state":"focus","motion":"fade","spacing":9},{"id":"c0837","surface":"chat","state":"loading","motion":"slide","spacing":10},{"id":"c0838","surface":"settings","state":"success","motion":"scale","spacing":12},{"id":"c0839","surface":"login","state":"disabled","motion":"rotate","spacing":14},{"id":"c0840","surface":"sidebar","state":"default","motion":"none","spacing":16},{"id":"c0841","surface":"header","state":"hover","motion":"fade","spacing":18},{"id":"c0842","surface":"preview","state":"active","motion":"slide","spacing":20},{"id":"c0843","surface":"product","state":"focus","motion":"scale","spacing":22},{"id":"c0844","surface":"items","state":"loading","motion":"rotate","spacing":24},{"id":"c0845","surface":"footer","state":"success","motion":"none","spacing":4},{"id":"c0846","surface":"gift","state":"disabled","motion":"fade","spacing":6},{"id":"c0847","surface":"chat","state":"default","motion":"slide","spacing":7},{"id":"c0848","surface":"settings","state":"hover","motion":"scale","spacing":8},{"id":"c0849","surface":"login","state":"active","motion":"rotate","spacing":9},{"id":"c0850","surface":"sidebar","state":"focus","motion":"none","spacing":10},{"id":"c0851","surface":"header","state":"loading","motion":"fade","spacing":12},{"id":"c0852","surface":"preview","state":"success","motion":"slide","spacing":14},{"id":"c0853","surface":"product","state":"disabled","motion":"scale","spacing":16},{"id":"c0854","surface":"items","state":"default","motion":"rotate","spacing":18},{"id":"c0855","surface":"footer","state":"hover","motion":"none","spacing":20},{"id":"c0856","surface":"gift","state":"active","motion":"fade","spacing":22},{"id":"c0857","surface":"chat","state":"focus","motion":"slide","spacing":24},{"id":"c0858","surface":"settings","state":"loading","motion":"scale","spacing":4},{"id":"c0859","surface":"login","state":"success","motion":"rotate","spacing":6},{"id":"c0860","surface":"sidebar","state":"disabled","motion":"none","spacing":7},{"id":"c0861","surface":"header","state":"default","motion":"fade","spacing":8},{"id":"c0862","surface":"preview","state":"hover","motion":"slide","spacing":9},{"id":"c0863","surface":"product","state":"active","motion":"scale","spacing":10},{"id":"c0864","surface":"items","state":"focus","motion":"rotate","spacing":12},{"id":"c0865","surface":"footer","state":"loading","motion":"none","spacing":14},{"id":"c0866","surface":"gift","state":"success","motion":"fade","spacing":16},{"id":"c0867","surface":"chat","state":"disabled","motion":"slide","spacing":18},{"id":"c0868","surface":"settings","state":"default","motion":"scale","spacing":20},{"id":"c0869","surface":"login","state":"hover","motion":"rotate","spacing":22},{"id":"c0870","surface":"sidebar","state":"active","motion":"none","spacing":24},{"id":"c0871","surface":"header","state":"focus","motion":"fade","spacing":4},{"id":"c0872","surface":"preview","state":"loading","motion":"slide","spacing":6},{"id":"c0873","surface":"product","state":"success","motion":"scale","spacing":7},{"id":"c0874","surface":"items","state":"disabled","motion":"rotate","spacing":8},{"id":"c0875","surface":"footer","state":"default","motion":"none","spacing":9},{"id":"c0876","surface":"gift","state":"hover","motion":"fade","spacing":10},{"id":"c0877","surface":"chat","state":"active","motion":"slide","spacing":12},{"id":"c0878","surface":"settings","state":"focus","motion":"scale","spacing":14},{"id":"c0879","surface":"login","state":"loading","motion":"rotate","spacing":16},{"id":"c0880","surface":"sidebar","state":"success","motion":"none","spacing":18},{"id":"c0881","surface":"header","state":"disabled","motion":"fade","spacing":20},{"id":"c0882","surface":"preview","state":"default","motion":"slide","spacing":22},{"id":"c0883","surface":"product","state":"hover","motion":"scale","spacing":24},{"id":"c0884","surface":"items","state":"active","motion":"rotate","spacing":4},{"id":"c0885","surface":"footer","state":"focus","motion":"none","spacing":6},{"id":"c0886","surface":"gift","state":"loading","motion":"fade","spacing":7},{"id":"c0887","surface":"chat","state":"success","motion":"slide","spacing":8},{"id":"c0888","surface":"settings","state":"disabled","motion":"scale","spacing":9},{"id":"c0889","surface":"login","state":"default","motion":"rotate","spacing":10},{"id":"c0890","surface":"sidebar","state":"hover","motion":"none","spacing":12},{"id":"c0891","surface":"header","state":"active","motion":"fade","spacing":14},{"id":"c0892","surface":"preview","state":"focus","motion":"slide","spacing":16},{"id":"c0893","surface":"product","state":"loading","motion":"scale","spacing":18},{"id":"c0894","surface":"items","state":"success","motion":"rotate","spacing":20},{"id":"c0895","surface":"footer","state":"disabled","motion":"none","spacing":22},{"id":"c0896","surface":"gift","state":"default","motion":"fade","spacing":24},{"id":"c0897","surface":"chat","state":"hover","motion":"slide","spacing":4},{"id":"c0898","surface":"settings","state":"active","motion":"scale","spacing":6},{"id":"c0899","surface":"login","state":"focus","motion":"rotate","spacing":7},{"id":"c0900","surface":"sidebar","state":"loading","motion":"none","spacing":8},{"id":"c0901","surface":"header","state":"success","motion":"fade","spacing":9},{"id":"c0902","surface":"preview","state":"disabled","motion":"slide","spacing":10},{"id":"c0903","surface":"product","state":"default","motion":"scale","spacing":12},{"id":"c0904","surface":"items","state":"hover","motion":"rotate","spacing":14},{"id":"c0905","surface":"footer","state":"active","motion":"none","spacing":16},{"id":"c0906","surface":"gift","state":"focus","motion":"fade","spacing":18},{"id":"c0907","surface":"chat","state":"loading","motion":"slide","spacing":20},{"id":"c0908","surface":"settings","state":"success","motion":"scale","spacing":22},{"id":"c0909","surface":"login","state":"disabled","motion":"rotate","spacing":24},{"id":"c0910","surface":"sidebar","state":"default","motion":"none","spacing":4},{"id":"c0911","surface":"header","state":"hover","motion":"fade","spacing":6},{"id":"c0912","surface":"preview","state":"active","motion":"slide","spacing":7},{"id":"c0913","surface":"product","state":"focus","motion":"scale","spacing":8},{"id":"c0914","surface":"items","state":"loading","motion":"rotate","spacing":9},{"id":"c0915","surface":"footer","state":"success","motion":"none","spacing":10},{"id":"c0916","surface":"gift","state":"disabled","motion":"fade","spacing":12},{"id":"c0917","surface":"chat","state":"default","motion":"slide","spacing":14},{"id":"c0918","surface":"settings","state":"hover","motion":"scale","spacing":16},{"id":"c0919","surface":"login","state":"active","motion":"rotate","spacing":18},{"id":"c0920","surface":"sidebar","state":"focus","motion":"none","spacing":20},{"id":"c0921","surface":"header","state":"loading","motion":"fade","spacing":22},{"id":"c0922","surface":"preview","state":"success","motion":"slide","spacing":24},{"id":"c0923","surface":"product","state":"disabled","motion":"scale","spacing":4},{"id":"c0924","surface":"items","state":"default","motion":"rotate","spacing":6},{"id":"c0925","surface":"footer","state":"hover","motion":"none","spacing":7},{"id":"c0926","surface":"gift","state":"active","motion":"fade","spacing":8},{"id":"c0927","surface":"chat","state":"focus","motion":"slide","spacing":9},{"id":"c0928","surface":"settings","state":"loading","motion":"scale","spacing":10},{"id":"c0929","surface":"login","state":"success","motion":"rotate","spacing":12},{"id":"c0930","surface":"sidebar","state":"disabled","motion":"none","spacing":14},{"id":"c0931","surface":"header","state":"default","motion":"fade","spacing":16},{"id":"c0932","surface":"preview","state":"hover","motion":"slide","spacing":18},{"id":"c0933","surface":"product","state":"active","motion":"scale","spacing":20},{"id":"c0934","surface":"items","state":"focus","motion":"rotate","spacing":22},{"id":"c0935","surface":"footer","state":"loading","motion":"none","spacing":24},{"id":"c0936","surface":"gift","state":"success","motion":"fade","spacing":4},{"id":"c0937","surface":"chat","state":"disabled","motion":"slide","spacing":6},{"id":"c0938","surface":"settings","state":"default","motion":"scale","spacing":7},{"id":"c0939","surface":"login","state":"hover","motion":"rotate","spacing":8},{"id":"c0940","surface":"sidebar","state":"active","motion":"none","spacing":9},{"id":"c0941","surface":"header","state":"focus","motion":"fade","spacing":10},{"id":"c0942","surface":"preview","state":"loading","motion":"slide","spacing":12},{"id":"c0943","surface":"product","state":"success","motion":"scale","spacing":14},{"id":"c0944","surface":"items","state":"disabled","motion":"rotate","spacing":16},{"id":"c0945","surface":"footer","state":"default","motion":"none","spacing":18},{"id":"c0946","surface":"gift","state":"hover","motion":"fade","spacing":20},{"id":"c0947","surface":"chat","state":"active","motion":"slide","spacing":22},{"id":"c0948","surface":"settings","state":"focus","motion":"scale","spacing":24},{"id":"c0949","surface":"login","state":"loading","motion":"rotate","spacing":4},{"id":"c0950","surface":"sidebar","state":"success","motion":"none","spacing":6},{"id":"c0951","surface":"header","state":"disabled","motion":"fade","spacing":7},{"id":"c0952","surface":"preview","state":"default","motion":"slide","spacing":8},{"id":"c0953","surface":"product","state":"hover","motion":"scale","spacing":9},{"id":"c0954","surface":"items","state":"active","motion":"rotate","spacing":10},{"id":"c0955","surface":"footer","state":"focus","motion":"none","spacing":12},{"id":"c0956","surface":"gift","state":"loading","motion":"fade","spacing":14},{"id":"c0957","surface":"chat","state":"success","motion":"slide","spacing":16},{"id":"c0958","surface":"settings","state":"disabled","motion":"scale","spacing":18},{"id":"c0959","surface":"login","state":"default","motion":"rotate","spacing":20},{"id":"c0960","surface":"sidebar","state":"hover","motion":"none","spacing":22},{"id":"c0961","surface":"header","state":"active","motion":"fade","spacing":24},{"id":"c0962","surface":"preview","state":"focus","motion":"slide","spacing":4},{"id":"c0963","surface":"product","state":"loading","motion":"scale","spacing":6},{"id":"c0964","surface":"items","state":"success","motion":"rotate","spacing":7},{"id":"c0965","surface":"footer","state":"disabled","motion":"none","spacing":8},{"id":"c0966","surface":"gift","state":"default","motion":"fade","spacing":9},{"id":"c0967","surface":"chat","state":"hover","motion":"slide","spacing":10},{"id":"c0968","surface":"settings","state":"active","motion":"scale","spacing":12},{"id":"c0969","surface":"login","state":"focus","motion":"rotate","spacing":14},{"id":"c0970","surface":"sidebar","state":"loading","motion":"none","spacing":16},{"id":"c0971","surface":"header","state":"success","motion":"fade","spacing":18},{"id":"c0972","surface":"preview","state":"disabled","motion":"slide","spacing":20},{"id":"c0973","surface":"product","state":"default","motion":"scale","spacing":22},{"id":"c0974","surface":"items","state":"hover","motion":"rotate","spacing":24},{"id":"c0975","surface":"footer","state":"active","motion":"none","spacing":4},{"id":"c0976","surface":"gift","state":"focus","motion":"fade","spacing":6},{"id":"c0977","surface":"chat","state":"loading","motion":"slide","spacing":7},{"id":"c0978","surface":"settings","state":"success","motion":"scale","spacing":8},{"id":"c0979","surface":"login","state":"disabled","motion":"rotate","spacing":9},{"id":"c0980","surface":"sidebar","state":"default","motion":"none","spacing":10},{"id":"c0981","surface":"header","state":"hover","motion":"fade","spacing":12},{"id":"c0982","surface":"preview","state":"active","motion":"slide","spacing":14},{"id":"c0983","surface":"product","state":"focus","motion":"scale","spacing":16},{"id":"c0984","surface":"items","state":"loading","motion":"rotate","spacing":18},{"id":"c0985","surface":"footer","state":"success","motion":"none","spacing":20},{"id":"c0986","surface":"gift","state":"disabled","motion":"fade","spacing":22},{"id":"c0987","surface":"chat","state":"default","motion":"slide","spacing":24},{"id":"c0988","surface":"settings","state":"hover","motion":"scale","spacing":4},{"id":"c0989","surface":"login","state":"active","motion":"rotate","spacing":6},{"id":"c0990","surface":"sidebar","state":"focus","motion":"none","spacing":7},{"id":"c0991","surface":"header","state":"loading","motion":"fade","spacing":8},{"id":"c0992","surface":"preview","state":"success","motion":"slide","spacing":9},{"id":"c0993","surface":"product","state":"disabled","motion":"scale","spacing":10},{"id":"c0994","surface":"items","state":"default","motion":"rotate","spacing":12},{"id":"c0995","surface":"footer","state":"hover","motion":"none","spacing":14},{"id":"c0996","surface":"gift","state":"active","motion":"fade","spacing":16},{"id":"c0997","surface":"chat","state":"focus","motion":"slide","spacing":18},{"id":"c0998","surface":"settings","state":"loading","motion":"scale","spacing":20},{"id":"c0999","surface":"login","state":"success","motion":"rotate","spacing":22},{"id":"c1000","surface":"sidebar","state":"disabled","motion":"none","spacing":24},{"id":"c1001","surface":"header","state":"default","motion":"fade","spacing":4},{"id":"c1002","surface":"preview","state":"hover","motion":"slide","spacing":6},{"id":"c1003","surface":"product","state":"active","motion":"scale","spacing":7},{"id":"c1004","surface":"items","state":"focus","motion":"rotate","spacing":8},{"id":"c1005","surface":"footer","state":"loading","motion":"none","spacing":9},{"id":"c1006","surface":"gift","state":"success","motion":"fade","spacing":10},{"id":"c1007","surface":"chat","state":"disabled","motion":"slide","spacing":12},{"id":"c1008","surface":"settings","state":"default","motion":"scale","spacing":14},{"id":"c1009","surface":"login","state":"hover","motion":"rotate","spacing":16},{"id":"c1010","surface":"sidebar","state":"active","motion":"none","spacing":18},{"id":"c1011","surface":"header","state":"focus","motion":"fade","spacing":20},{"id":"c1012","surface":"preview","state":"loading","motion":"slide","spacing":22},{"id":"c1013","surface":"product","state":"success","motion":"scale","spacing":24},{"id":"c1014","surface":"items","state":"disabled","motion":"rotate","spacing":4},{"id":"c1015","surface":"footer","state":"default","motion":"none","spacing":6},{"id":"c1016","surface":"gift","state":"hover","motion":"fade","spacing":7},{"id":"c1017","surface":"chat","state":"active","motion":"slide","spacing":8},{"id":"c1018","surface":"settings","state":"focus","motion":"scale","spacing":9},{"id":"c1019","surface":"login","state":"loading","motion":"rotate","spacing":10},{"id":"c1020","surface":"sidebar","state":"success","motion":"none","spacing":12},{"id":"c1021","surface":"header","state":"disabled","motion":"fade","spacing":14},{"id":"c1022","surface":"preview","state":"default","motion":"slide","spacing":16},{"id":"c1023","surface":"product","state":"hover","motion":"scale","spacing":18},{"id":"c1024","surface":"items","state":"active","motion":"rotate","spacing":20},{"id":"c1025","surface":"footer","state":"focus","motion":"none","spacing":22},{"id":"c1026","surface":"gift","state":"loading","motion":"fade","spacing":24},{"id":"c1027","surface":"chat","state":"success","motion":"slide","spacing":4},{"id":"c1028","surface":"settings","state":"disabled","motion":"scale","spacing":6},{"id":"c1029","surface":"login","state":"default","motion":"rotate","spacing":7},{"id":"c1030","surface":"sidebar","state":"hover","motion":"none","spacing":8},{"id":"c1031","surface":"header","state":"active","motion":"fade","spacing":9},{"id":"c1032","surface":"preview","state":"focus","motion":"slide","spacing":10},{"id":"c1033","surface":"product","state":"loading","motion":"scale","spacing":12},{"id":"c1034","surface":"items","state":"success","motion":"rotate","spacing":14},{"id":"c1035","surface":"footer","state":"disabled","motion":"none","spacing":16},{"id":"c1036","surface":"gift","state":"default","motion":"fade","spacing":18},{"id":"c1037","surface":"chat","state":"hover","motion":"slide","spacing":20},{"id":"c1038","surface":"settings","state":"active","motion":"scale","spacing":22},{"id":"c1039","surface":"login","state":"focus","motion":"rotate","spacing":24},{"id":"c1040","surface":"sidebar","state":"loading","motion":"none","spacing":4},{"id":"c1041","surface":"header","state":"success","motion":"fade","spacing":6},{"id":"c1042","surface":"preview","state":"disabled","motion":"slide","spacing":7},{"id":"c1043","surface":"product","state":"default","motion":"scale","spacing":8},{"id":"c1044","surface":"items","state":"hover","motion":"rotate","spacing":9},{"id":"c1045","surface":"footer","state":"active","motion":"none","spacing":10},{"id":"c1046","surface":"gift","state":"focus","motion":"fade","spacing":12},{"id":"c1047","surface":"chat","state":"loading","motion":"slide","spacing":14},{"id":"c1048","surface":"settings","state":"success","motion":"scale","spacing":16},{"id":"c1049","surface":"login","state":"disabled","motion":"rotate","spacing":18},{"id":"c1050","surface":"sidebar","state":"default","motion":"none","spacing":20},{"id":"c1051","surface":"header","state":"hover","motion":"fade","spacing":22},{"id":"c1052","surface":"preview","state":"active","motion":"slide","spacing":24},{"id":"c1053","surface":"product","state":"focus","motion":"scale","spacing":4},{"id":"c1054","surface":"items","state":"loading","motion":"rotate","spacing":6},{"id":"c1055","surface":"footer","state":"success","motion":"none","spacing":7},{"id":"c1056","surface":"gift","state":"disabled","motion":"fade","spacing":8},{"id":"c1057","surface":"chat","state":"default","motion":"slide","spacing":9},{"id":"c1058","surface":"settings","state":"hover","motion":"scale","spacing":10},{"id":"c1059","surface":"login","state":"active","motion":"rotate","spacing":12},{"id":"c1060","surface":"sidebar","state":"focus","motion":"none","spacing":14},{"id":"c1061","surface":"header","state":"loading","motion":"fade","spacing":16},{"id":"c1062","surface":"preview","state":"success","motion":"slide","spacing":18},{"id":"c1063","surface":"product","state":"disabled","motion":"scale","spacing":20},{"id":"c1064","surface":"items","state":"default","motion":"rotate","spacing":22},{"id":"c1065","surface":"footer","state":"hover","motion":"none","spacing":24},{"id":"c1066","surface":"gift","state":"active","motion":"fade","spacing":4},{"id":"c1067","surface":"chat","state":"focus","motion":"slide","spacing":6},{"id":"c1068","surface":"settings","state":"loading","motion":"scale","spacing":7},{"id":"c1069","surface":"login","state":"success","motion":"rotate","spacing":8},{"id":"c1070","surface":"sidebar","state":"disabled","motion":"none","spacing":9},{"id":"c1071","surface":"header","state":"default","motion":"fade","spacing":10},{"id":"c1072","surface":"preview","state":"hover","motion":"slide","spacing":12},{"id":"c1073","surface":"product","state":"active","motion":"scale","spacing":14},{"id":"c1074","surface":"items","state":"focus","motion":"rotate","spacing":16},{"id":"c1075","surface":"footer","state":"loading","motion":"none","spacing":18},{"id":"c1076","surface":"gift","state":"success","motion":"fade","spacing":20},{"id":"c1077","surface":"chat","state":"disabled","motion":"slide","spacing":22},{"id":"c1078","surface":"settings","state":"default","motion":"scale","spacing":24},{"id":"c1079","surface":"login","state":"hover","motion":"rotate","spacing":4},{"id":"c1080","surface":"sidebar","state":"active","motion":"none","spacing":6},{"id":"c1081","surface":"header","state":"focus","motion":"fade","spacing":7},{"id":"c1082","surface":"preview","state":"loading","motion":"slide","spacing":8},{"id":"c1083","surface":"product","state":"success","motion":"scale","spacing":9},{"id":"c1084","surface":"items","state":"disabled","motion":"rotate","spacing":10},{"id":"c1085","surface":"footer","state":"default","motion":"none","spacing":12},{"id":"c1086","surface":"gift","state":"hover","motion":"fade","spacing":14},{"id":"c1087","surface":"chat","state":"active","motion":"slide","spacing":16},{"id":"c1088","surface":"settings","state":"focus","motion":"scale","spacing":18},{"id":"c1089","surface":"login","state":"loading","motion":"rotate","spacing":20},{"id":"c1090","surface":"sidebar","state":"success","motion":"none","spacing":22},{"id":"c1091","surface":"header","state":"disabled","motion":"fade","spacing":24},{"id":"c1092","surface":"preview","state":"default","motion":"slide","spacing":4},{"id":"c1093","surface":"product","state":"hover","motion":"scale","spacing":6},{"id":"c1094","surface":"items","state":"active","motion":"rotate","spacing":7},{"id":"c1095","surface":"footer","state":"focus","motion":"none","spacing":8},{"id":"c1096","surface":"gift","state":"loading","motion":"fade","spacing":9},{"id":"c1097","surface":"chat","state":"success","motion":"slide","spacing":10},{"id":"c1098","surface":"settings","state":"disabled","motion":"scale","spacing":12},{"id":"c1099","surface":"login","state":"default","motion":"rotate","spacing":14},{"id":"c1100","surface":"sidebar","state":"hover","motion":"none","spacing":16},{"id":"c1101","surface":"header","state":"active","motion":"fade","spacing":18},{"id":"c1102","surface":"preview","state":"focus","motion":"slide","spacing":20},{"id":"c1103","surface":"product","state":"loading","motion":"scale","spacing":22},{"id":"c1104","surface":"items","state":"success","motion":"rotate","spacing":24},{"id":"c1105","surface":"footer","state":"disabled","motion":"none","spacing":4},{"id":"c1106","surface":"gift","state":"default","motion":"fade","spacing":6},{"id":"c1107","surface":"chat","state":"hover","motion":"slide","spacing":7},{"id":"c1108","surface":"settings","state":"active","motion":"scale","spacing":8},{"id":"c1109","surface":"login","state":"focus","motion":"rotate","spacing":9},{"id":"c1110","surface":"sidebar","state":"loading","motion":"none","spacing":10},{"id":"c1111","surface":"header","state":"success","motion":"fade","spacing":12},{"id":"c1112","surface":"preview","state":"disabled","motion":"slide","spacing":14},{"id":"c1113","surface":"product","state":"default","motion":"scale","spacing":16},{"id":"c1114","surface":"items","state":"hover","motion":"rotate","spacing":18},{"id":"c1115","surface":"footer","state":"active","motion":"none","spacing":20},{"id":"c1116","surface":"gift","state":"focus","motion":"fade","spacing":22},{"id":"c1117","surface":"chat","state":"loading","motion":"slide","spacing":24},{"id":"c1118","surface":"settings","state":"success","motion":"scale","spacing":4},{"id":"c1119","surface":"login","state":"disabled","motion":"rotate","spacing":6},{"id":"c1120","surface":"sidebar","state":"default","motion":"none","spacing":7},{"id":"c1121","surface":"header","state":"hover","motion":"fade","spacing":8},{"id":"c1122","surface":"preview","state":"active","motion":"slide","spacing":9},{"id":"c1123","surface":"product","state":"focus","motion":"scale","spacing":10},{"id":"c1124","surface":"items","state":"loading","motion":"rotate","spacing":12},{"id":"c1125","surface":"footer","state":"success","motion":"none","spacing":14},{"id":"c1126","surface":"gift","state":"disabled","motion":"fade","spacing":16},{"id":"c1127","surface":"chat","state":"default","motion":"slide","spacing":18},{"id":"c1128","surface":"settings","state":"hover","motion":"scale","spacing":20},{"id":"c1129","surface":"login","state":"active","motion":"rotate","spacing":22},{"id":"c1130","surface":"sidebar","state":"focus","motion":"none","spacing":24},{"id":"c1131","surface":"header","state":"loading","motion":"fade","spacing":4},{"id":"c1132","surface":"preview","state":"success","motion":"slide","spacing":6},{"id":"c1133","surface":"product","state":"disabled","motion":"scale","spacing":7},{"id":"c1134","surface":"items","state":"default","motion":"rotate","spacing":8},{"id":"c1135","surface":"footer","state":"hover","motion":"none","spacing":9},{"id":"c1136","surface":"gift","state":"active","motion":"fade","spacing":10},{"id":"c1137","surface":"chat","state":"focus","motion":"slide","spacing":12},{"id":"c1138","surface":"settings","state":"loading","motion":"scale","spacing":14},{"id":"c1139","surface":"login","state":"success","motion":"rotate","spacing":16},{"id":"c1140","surface":"sidebar","state":"disabled","motion":"none","spacing":18},{"id":"c1141","surface":"header","state":"default","motion":"fade","spacing":20},{"id":"c1142","surface":"preview","state":"hover","motion":"slide","spacing":22},{"id":"c1143","surface":"product","state":"active","motion":"scale","spacing":24},{"id":"c1144","surface":"items","state":"focus","motion":"rotate","spacing":4},{"id":"c1145","surface":"footer","state":"loading","motion":"none","spacing":6},{"id":"c1146","surface":"gift","state":"success","motion":"fade","spacing":7},{"id":"c1147","surface":"chat","state":"disabled","motion":"slide","spacing":8},{"id":"c1148","surface":"settings","state":"default","motion":"scale","spacing":9},{"id":"c1149","surface":"login","state":"hover","motion":"rotate","spacing":10}]</script>
 </body>
-</html>
+  </html>
